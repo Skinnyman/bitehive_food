@@ -1,0 +1,155 @@
+import React, { useEffect, useState } from "react";
+import { MdOutlineDone, MdCancel } from "react-icons/md";
+import { IoStarSharp } from "react-icons/io5";
+import axios from "axios";
+import { serverport } from "../../Static/Variables";
+
+
+
+function Order() {
+  //const [rating, setRating] = useState(0);
+  //const [editedRating, setEditedRating] = useState(false);
+  const [allorder,setAllOrder] = useState([])
+
+  const fetchOrders = async()=>{
+    const userId = localStorage.getItem('id');
+   // console.log(userId)
+    axios.get(`${serverport}/api/order/getorder?userId=${userId}`)
+    .then((res) => {
+      //console.log('API response:', res.data);
+      const data = res.data;
+      // force it into an array if it's a single object
+      if (Array.isArray(data)) {
+        setAllOrder(data);
+      } else {
+        setAllOrder([data]); // wrap object in an array
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      setAllOrder([]); // fallback on error
+    });
+  }
+  const updateStatus = async (id, newStatus) => {
+     await axios.patch(`${serverport}/api/order/status/${id}`, {
+      status: newStatus,
+    });
+    fetchOrders(); // refresh data
+  };
+   useEffect(()=>{
+      fetchOrders()
+    },[])
+    //console.log(allorder)
+
+  return (
+    <div  className="grid grid-cols-1 md:grid-cols-2 gap-14">
+        {allorder?.length === 0 && <div>No orders available</div>}
+ {allorder.slice().reverse().map((order) => (     
+        <div key={order._id} className="flex flex-col h-fit w-[400px] border p-2 mr-2 mb-5 shadow-md hover:shadow-xl bg-blue-100">
+    <h1 className="text-lg font-bold ml-2">Order Information</h1> 
+           
+
+    <div className="flex flex-col items-center">
+      <PropValue property="Meal Name:" value={order.mealName} />
+      <PropValue property="Price:" value={`GHC ${order.price}`} />
+      <PropValue property="Quantity:" value={order.quantity || 1} />
+      <PropValue property="Type:" value={order.deliveryOption} />
+      <PropValue property="Status:" value={order.status} />
+      <PropValue property="Total Price:" value={`GHC ${order.totalPrice}`} />
+    </div>
+
+    {/* Order Action Buttons */}
+    {order.status === "pending" && (
+              <div className="flex mt-3 gap-3">
+                <button onClick={() => updateStatus(order._id, "accepted")} className="flex items-center border px-3 py-2 bg-green-100 hover:bg-green-200">
+                  <MdOutlineDone className="text-green-500 mr-2" /> Accept Order
+                </button>
+                <button onClick={() => updateStatus(order._id, "cancelled")} className="flex items-center border px-3 py-2 hover:bg-red-200">
+                  <MdCancel className="text-red-500 mr-2" /> Cancel Order
+                </button>
+              </div>
+            )}
+
+
+    {/* Completed Order Actions */}
+    {order.status === "accepted" && (
+              <div className="flex mt-3">
+                <button onClick={() => updateStatus(order._id, "completed")} className="flex items-center border px-3 py-2 bg-green-200 hover:bg-green-300">
+                  <MdOutlineDone className="text-green-600 mr-2" /> Mark as Ready
+                </button>
+              </div>
+            )}
+
+{order.status === "completed" && (
+            <div className="flex flex-col mt-3 text-green-700 font-semibold">
+                <div className="flex items-center">
+                <MdOutlineDone className="mr-2" />
+                Order Completed
+                </div>
+                {order.rating > 0 && (
+                <div className="flex items-center mt-2">
+                    <span className="mr-2">Rating:</span>
+                    {[...Array(order.rating)].map((_, i) => (
+                    <IoStarSharp key={i} className="text-yellow-400 mr-1" />
+                    ))}
+                </div>
+                )}
+            </div>
+)}
+            {order.status === "cancelled" && (
+              <div className="flex items-center mt-3 text-red-600 font-semibold">
+                <MdCancel className="mr-2" />
+                Order Cancelled
+              </div>
+            )}
+            
+    
+
+    {/* Rating Section */}
+    {/* <div className="flex flex-row items-center border mt-4 px-3 py-3">
+      <div className="text-sm font-semibold text-gray-500 mr-4">Rating:</div>
+      {[1, 2, 3, 4, 5].map((num) => (
+        <IoStarSharp
+          key={num}
+          className={`mr-2 ${rating >= num ? "text-yellow-400" : "text-gray-300"} cursor-pointer`}
+          size={22}
+          onClick={() => {
+              setRating(num);
+              setEditedRating(true);
+            }}
+            />
+      ))}
+    </div> */}
+
+    {/* {editedRating && (
+      <div
+        className="flex flex-row items-center border mt-3 px-3 py-2 cursor-pointer hover:shadow-xl hover:bg-green-200"
+        onClick={() => {
+            alert(`Rating submitted: ${rating}`);
+            setEditedRating(false);
+        }}
+      >
+        <MdOutlineDone className="text-green-500 mr-2" size={22} />
+        <span>Submit Rating</span>
+      </div>
+    )} */}
+  </div>
+
+
+  
+   ))}
+    </div>
+  );
+}
+
+// Template for showing properties
+function PropValue({ property, value }) {
+  return (
+    <div className="flex flex-row w-full justify-between border-b py-2">
+      <div className="font-semibold">{property}</div>
+      <div>{value}</div>
+    </div>
+  );
+}
+
+export default Order;
