@@ -1,4 +1,3 @@
-node_modules
-build
-.env
-uploads
+/node_modules
+/.env
+/uploads
