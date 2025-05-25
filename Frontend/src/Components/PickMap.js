@@ -138,7 +138,7 @@ const PickMap = ({
     <div
       className={`${
         showMap ? "flex" : "hidden"
-      } absolute top-0 left-0 z-50 w-screen h-screen bg-gray-500 bg-opacity-70 justify-center items-center`}
+      } justify-center items-center absolute top-0 left-0 bg-[#6b7280aa] w-[100vw] h-[100vh] z-50`}
     >
       <div
         className="bg-white w-[90%] md:w-[60%] rounded-xl overflow-hidden"

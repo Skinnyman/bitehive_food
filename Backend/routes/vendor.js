@@ -27,12 +27,27 @@ const Favorite = require("../Models/favorite")
 
 // })
 router.post('/register', async (req, res) => {
-    const{userId,businessName,email,contactPerson,description,phone,delivery}= req.body;
-    const vendor = await Vendor.create({userId,businessName,email,contactPerson,description,phone,delivery});
+    const{userId,businessName,email,contactPerson,description,phone,delivery,location}= req.body;
+    const vendor = await Vendor.create({userId,businessName,email,contactPerson,description,phone,delivery,location});
      await User.findByIdAndUpdate(userId, { hasVendorShop: true });
     res.status(201).json(vendor);
    
   });
+
+router.put('/update-business', async (req, res) => {
+  const { userId, businessName, contactPerson, phone, email, description, delivery, location } = req.body;
+  try {
+    const updated = await Vendor.findOneAndUpdate(
+      { userId },
+      { businessName, contactPerson, phone, email, description, delivery, location },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update business info' });
+  }
+});
+
 router.post('/favorite', async (req, res) => {
     const{customerId,vendorId}= req.body;
     const favorite = await Favorite.create({customerId,vendorId});

@@ -5,54 +5,51 @@ import { useNavigate } from 'react-router-dom';
 import { serverport } from '../../Static/Variables';
 import PickMap from '../../Components/PickMap';
 
-
-
-
 const VendorForm = () => {
- 
-const navigate = useNavigate()  
-const user = localStorage.getItem('id'); 
-const [formData, setFormData] = useState({
-   userId: user,
+  const navigate = useNavigate();
+  const user = localStorage.getItem('id');
+
+  const [formData, setFormData] = useState({
+    userId: user,
     businessName: '',
     contactPerson: '',
     phone: '+233',
     email: '',
     description: '',
     delivery: '',
+    location: '', 
   });
-  const [location, setLocation] = useState("");
-	const [showMap, setShowMap] = useState(false);
-	const [coords, setCoords] = useState([-1.6221, 6.923]);
 
-  const handleChange =  (e) => {
+  const [location, setLocation] = useState("");
+  const [showMap, setShowMap] = useState(false);
+  const [coords, setCoords] = useState([-1.6221, 6.923]);
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit =async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try{
-     const response = await axios.post(`${serverport}/api/vendor/register`,formData);
+    // Optional check if location is required
+    // if (!formData.location) {
+    //   alert("Please pick a location before submitting.");
+    //   return;
+    // }
 
-     localStorage.setItem('user',JSON.stringify(user))
-     navigate("/vendor");
-     console.log("Success:",response.data.message || "registration completed")
-     
-    }catch(err){
-         console.log(err)
+    try {
+      const response = await axios.post(`${serverport}/api/vendor/register`, formData);
+      localStorage.setItem('user', JSON.stringify(user));
+      navigate("/vendor");
+      console.log("Success:", response.data.message || "registration completed");
+    } catch (err) {
+      console.log(err);
     }
-    //console.log('Submitted data:', formData);
-   
-  
-
-   
   };
 
   return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center p-6">
-     
       <form
         onSubmit={handleSubmit}
         className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-xl"
@@ -112,18 +109,26 @@ const [formData, setFormData] = useState({
             className="w-full border rounded-lg p-3"
           />
         </div>
-        {/* use location */}
-        <PickMap 
-           showMap={showMap}
-						setShowMap={setShowMap}
-						setCoords={setCoords}
-						setLocationAddr={setLocation}/>
+
+        {/* Map Picker */}
+        <PickMap
+          showMap={showMap}
+          setShowMap={setShowMap}
+          setCoords={setCoords}
+          setLocationAddr={(addr) => {
+            setLocation(addr);
+            setFormData((prev) => ({ ...prev, location: addr }));
+          }}
+        />
         <div
-						className="my-3 border w-72 h-10 mr-10 py-2 rounded-md shadow-md hover:shadow-xl text-center cursor-pointer"
-						onClick={() => setShowMap(true)}
-					>
-						{!location ? "Pick locations" : location}
-					</div>
+          className="my-3 border w-72 h-10 mr-10 py-2 rounded-md shadow-md hover:shadow-xl text-center cursor-pointer"
+          onClick={() => setShowMap(true)}
+        >
+          {!location ? "Pick location" : location}
+        </div>
+
+        {/* Hidden input for location */}
+        <input type="hidden" name="location" value={formData.location} />
 
         {/* Business Details */}
         <div className="mb-6">
@@ -151,7 +156,7 @@ const [formData, setFormData] = useState({
           <select
             name="delivery"
             value={formData.delivery}
-            onChange={(e) => setFormData({ ...formData,delivery:e.target.value})}
+            onChange={(e) => setFormData({ ...formData, delivery: e.target.value })}
             required
             className="w-full border rounded-lg p-3"
           >
@@ -160,7 +165,6 @@ const [formData, setFormData] = useState({
             <option value="No">No</option>
           </select>
         </div>
-        
 
         {/* Submit Button */}
         <div className="text-center mt-6">
@@ -170,7 +174,6 @@ const [formData, setFormData] = useState({
           >
             Submit
           </button>
-          
         </div>
       </form>
     </div>
