@@ -28,8 +28,8 @@ const VendorSchema = new mongoose.Schema({
 		
 	},
     location: {
-        type: String,
-        required: false,
+        latitude: Number,
+		longitude: Number,
     }  
 })
 

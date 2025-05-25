@@ -7,6 +7,7 @@ import Vendor from './Pages/VendorPage/Vendor';
 import Client from './Pages/Client Page/Client';
 import VendorForm from './Pages/Vendor Form/VendorForm';
 import VendorProf from './Pages/Vendor Profile/VendorProf';
+import "mapbox-gl/dist/mapbox-gl.css";
 
 // 🔐 Protected Route Component
 const ProtectedRoute = ({ children }) => {
