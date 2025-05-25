@@ -14,7 +14,11 @@ function Profile() {
     email: '',
     description: '',
     delivery: '',
-    location: '',
+    location: {
+      latitude: '',
+      longitude: '',
+      address: '',
+    },
   });
 
   const [originalData, setOriginalData] = useState({});
@@ -28,45 +32,41 @@ function Profile() {
     "1": 0, "2": 0, "3": 0, "4-5": 0,
     averageRating: 0,
   });
+  console.log("data",originalData)
 
   const [location, setLocation] = useState("");
   const [showMap, setShowMap] = useState(false);
   const [coords, setCoords] = useState([-1.6221, 6.923]);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Fetch business info
   useEffect(() => {
     axios.get(`${serverport}/api/vendor/business?userId=${userId}`)
       .then((res) => {
         setFormData((prev) => ({ ...prev, ...res.data }));
-        setOriginalData(res.data);
+        const data = res.data
+        setOriginalData(Array.isArray(data) ? data : [data]);
       })
       .catch((err) => console.log(err));
   }, [userId]);
-  
 
-  // Fetch order info
   useEffect(() => {
     axios.get(`${serverport}/api/vendor/orderinfo?userId=${userId}`)
       .then((res) => setInfo(res.data))
       .catch((err) => console.log(err));
   }, [userId]);
 
-  // Fetch favorites
   useEffect(() => {
     axios.get(`${serverport}/api/vendor/getfavorite?vendorId=${userId}`)
       .then((res) => setFav(res.data))
       .catch((err) => console.log(err));
   }, [userId]);
 
-  // Fetch order stats
   useEffect(() => {
     axios.get(`${serverport}/api/order/orders-stats?userId=${userId}`)
       .then(res => setStats(res.data))
       .catch(console.error);
   }, [userId]);
 
-  // Fetch ratings
   useEffect(() => {
     axios.get(`${serverport}/api/order/rating?userId=${userId}`)
       .then(res => setRatings({
@@ -76,7 +76,6 @@ function Profile() {
       .catch(console.error);
   }, [userId]);
 
-  // Handle input change
   const handleChange = (e) => {
     setFormData(prev => ({
       ...prev,
@@ -84,22 +83,17 @@ function Profile() {
     }));
   };
 
-  // Handle update business with error logging
   const handleUpdate = async () => {
-    console.log("Updating business with data:", formData);
     try {
       await axios.put(`${serverport}/api/vendor/update-business`, formData);
-     // alert("Business info updated successfully");
-      setOriginalData(formData); // Update the backup
+      setOriginalData(formData);
       setIsEditing(false);
       setShowMap(false);
     } catch (err) {
       console.error(err.response || err);
-      //alert("Failed to update business info");
     }
   };
 
-  // Handle cancel: discard changes and exit edit mode
   const handleCancel = () => {
     setFormData(originalData);
     setIsEditing(false);
@@ -163,25 +157,40 @@ function Profile() {
               </select>
             </div>
 
-            {/* Responsive PickMap container */}
-            <div className={`w-full h-64 md:h-96 lg:h-[500px] relative bottom-72 right-32 ${showMap ? 'block' : 'hidden'} my-3 rounded shadow-md`}>
-              <PickMap
-                showMap={showMap}
-                setShowMap={setShowMap}
-                setCoords={setCoords}
-                setLocationAddr={(addr) => {
-                  setLocation(addr);
-                  setFormData((prev) => ({ ...prev, location: addr }));
-                }}
-              />
+            {/* Responsive PickMap */}
+            <div className={`w-full aspect-[4/3] sm:aspect-[3/2] md:aspect-[16/9] lg:aspect-[16/10] relative ${showMap ? 'block' : 'hidden'} my-3 rounded shadow-md`}>
+            <PickMap
+          showMap={showMap}
+          setShowMap={setShowMap}
+          setCoords={(coord) => {
+            setCoords(coord);
+            setFormData((prev) => ({
+              ...prev,
+              location: {
+                ...prev.location,
+                longitude: coord[0],
+                latitude: coord[1],
+              },
+            }));
+          }}
+          setLocationAddr={(addr) => {
+            setFormData((prev) => ({
+              ...prev,
+              location: {
+                ...prev.location,
+                address: addr,
+              },
+            }));
+          }}
+        />
             </div>
 
-            {/* Location display and map toggle */}
+            {/* Location Display */}
             <div
-              className={`border w-96 h-10 py-2 rounded-md shadow-md hover:shadow-xl text-center cursor-pointer ${!isEditing ? 'pointer-events-none text-gray-400' : ''}`}
+              className={`border w-full sm:w-96 h-10 py-2 rounded-md shadow-md hover:shadow-xl text-center cursor-pointer ${!isEditing ? 'pointer-events-none text-gray-400' : ''}`}
               onClick={() => isEditing && setShowMap(true)}
             >
-              {!formData.location ? "Update Location" : formData.location}
+              {!formData.location ? "Update Location" : formData.location.address}
             </div>
 
             {/* Buttons */}
@@ -209,7 +218,7 @@ function Profile() {
         </div>
 
         {/* Orders Info Section */}
-        <div className="bg-white p-6 rounded-xl shadow-md w-full lg:w-1/3 h-[72vh]">
+        <div className="bg-white p-6 rounded-xl shadow-md w-full lg:w-1/3 h-[72vh] overflow-y-auto">
           <h2 className="text-xl font-bold bg-cyan-500 text-white rounded p-1 mb-4">Orders Information</h2>
           <hr className='bg-cyan-500 mb-4' />
           <ul className="space-y-3 text-gray-700 font-medium">

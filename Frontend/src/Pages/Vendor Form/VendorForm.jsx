@@ -17,10 +17,14 @@ const VendorForm = () => {
     email: '',
     description: '',
     delivery: '',
-    location: '', 
+    location: {
+      latitude: '',
+      longitude: '',
+      address: '',
+    },
   });
+  console.log("Data",formData)
 
-  const [location, setLocation] = useState("");
   const [showMap, setShowMap] = useState(false);
   const [coords, setCoords] = useState([-1.6221, 6.923]);
 
@@ -32,19 +36,13 @@ const VendorForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Optional check if location is required
-    // if (!formData.location) {
-    //   alert("Please pick a location before submitting.");
-    //   return;
-    // }
-
     try {
       const response = await axios.post(`${serverport}/api/vendor/register`, formData);
       localStorage.setItem('user', JSON.stringify(user));
-      navigate("/vendor");
-      console.log("Success:", response.data.message || "registration completed");
+      navigate('/vendor');
+      console.log('Success:', response.data.message || 'Registration completed');
     } catch (err) {
-      console.log(err);
+      console.error('Error submitting form:', err);
     }
   };
 
@@ -114,23 +112,37 @@ const VendorForm = () => {
         <PickMap
           showMap={showMap}
           setShowMap={setShowMap}
-          setCoords={setCoords}
+          setCoords={(coord) => {
+            setCoords(coord);
+            setFormData((prev) => ({
+              ...prev,
+              location: {
+                ...prev.location,
+                longitude: coord[0],
+                latitude: coord[1],
+              },
+            }));
+          }}
           setLocationAddr={(addr) => {
-            setLocation(addr);
-            setFormData((prev) => ({ ...prev, location: addr }));
+            setFormData((prev) => ({
+              ...prev,
+              location: {
+                ...prev.location,
+                address: addr,
+              },
+            }));
           }}
         />
+
+        {/* Location Display */}
         <div
           className="my-3 border w-72 h-10 mr-10 py-2 rounded-md shadow-md hover:shadow-xl text-center cursor-pointer"
           onClick={() => setShowMap(true)}
         >
-          {!location ? "Pick location" : location}
+          {!formData.location.address ? 'Pick location' : formData.location.address}
         </div>
 
-        {/* Hidden input for location */}
-        <input type="hidden" name="location" value={formData.location} />
-
-        {/* Business Details */}
+        {/* Business Description */}
         <div className="mb-6">
           <div className="flex items-center mb-2">
             <FaEnvelope className="text-blue-600 mr-2" />
@@ -147,7 +159,7 @@ const VendorForm = () => {
           ></textarea>
         </div>
 
-        {/* Delivery Options */}
+        {/* Delivery Option */}
         <div className="mb-6">
           <div className="flex items-center mb-2">
             <FaTruck className="text-blue-600 mr-2" />

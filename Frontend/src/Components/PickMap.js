@@ -3,10 +3,8 @@ import mapboxgl, { Marker } from "mapbox-gl";
 import { SearchBox, useGeocodingCore } from "@mapbox/search-js-react";
 import { IoCloseSharp } from "react-icons/io5";
 import { FaLocationDot } from "react-icons/fa6";
-//import "mapbox-gl/dist/mapbox-gl.css"; // 🔥 Required for map to render
 
-mapboxgl.accessToken =
-  "pk.eyJ1IjoiY3Jhemljb2RhIiwiYSI6ImNrbmVwYjJ2NzF0amwyb21yZ2VrYWUyamMifQ.fRl4FzY9JsIV21FbdfCHnQ";
+mapboxgl.accessToken = "pk.eyJ1IjoiY3Jhemljb2RhIiwiYSI6ImNrbmVwYjJ2NzF0amwyb21yZ2VrYWUyamMifQ.fRl4FzY9JsIV21FbdfCHnQ";
 
 const PickMap = ({
   showMap = false,
@@ -30,7 +28,24 @@ const PickMap = ({
     accessToken: mapboxgl.accessToken,
   });
 
-  // Initialize map
+  // Update marker position and address based on lngLat
+  const updateMarkerAndAddress = async (lngLat) => {
+    setLat(lngLat.lat);
+    setLng(lngLat.lng);
+    setCoords([lngLat.lng, lngLat.lat]);
+
+    if (marker.current) marker.current.remove();
+    marker.current = new Marker().setLngLat(lngLat).addTo(map.current);
+
+    const addr = await geocoding.reverse(lngLat);
+    const feature = addr?.features?.[0];
+    const fullAddress = feature?.properties?.full_address || "Unknown location";
+    setAddress(fullAddress);
+    setLocation(fullAddress);
+    setLocationAddr(fullAddress);
+  };
+
+  // Initialize the map
   useEffect(() => {
     if (!showMap || map.current || !mapContainer.current) return;
 
@@ -41,30 +56,15 @@ const PickMap = ({
       zoom: zoom,
     });
 
-    map.current.on("idle", () => {
-      map.current?.resize();
-    });
+    map.current.on("idle", () => map.current?.resize());
 
     if (markedSpot) {
-      new mapboxgl.Marker().setLngLat([lng, lat]).addTo(map.current);
+      new Marker().setLngLat([lng, lat]).addTo(map.current);
     }
 
     map.current.on("click", async (e) => {
       if (route || markedSpot) return;
-      const lngLat = e.lngLat;
-      setLat(lngLat.lat);
-      setLng(lngLat.lng);
-      setCoords([lngLat.lng, lngLat.lat]);
-
-      if (marker.current) marker.current.remove();
-      marker.current = new Marker().setLngLat(lngLat).addTo(map.current);
-
-      const addr = await geocoding.reverse(lngLat);
-      const fullAddress =
-        addr?.features?.[0]?.properties?.full_address || "Unknown location";
-      setAddress(fullAddress);
-      setLocation(fullAddress);
-      setLocationAddr(fullAddress);
+      await updateMarkerAndAddress(e.lngLat);
     });
 
     if (route) getRoute(route[0], route[1]);
@@ -73,22 +73,20 @@ const PickMap = ({
       map.current?.remove();
       map.current = null;
     };
-  }, [showMap, lng, lat, zoom, markedSpot, route]);
+  }, [showMap]);
 
-  // Resize on open
   useEffect(() => {
     if (map.current && showMap) {
       map.current.resize();
     }
   }, [showMap]);
 
-  // Fly to updated coords
   useEffect(() => {
     if (!map.current) return;
     map.current.flyTo({ center: [lng, lat], zoom });
-  }, [lng, lat, zoom]);
+  }, [lng, lat]);
 
-  // Route drawing
+  // Route drawing function
   const getRoute = async (start, end) => {
     const res = await fetch(
       `https://api.mapbox.com/directions/v5/mapbox/cycling/${start[0]},${start[1]};${end[0]},${end[1]}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
@@ -127,11 +125,25 @@ const PickMap = ({
       });
     }
 
-    new mapboxgl.Marker({ color: "red" }).setLngLat(start).addTo(map.current);
-    new mapboxgl.Marker({ color: "green" }).setLngLat(end).addTo(map.current);
+    new Marker({ color: "red" }).setLngLat(start).addTo(map.current);
+    new Marker({ color: "green" }).setLngLat(end).addTo(map.current);
 
     setLng(start[0]);
     setLat(start[1]);
+  };
+
+  // Fly to user current location
+  const goToMyLocation = () => {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const lngLat = {
+        lng: position.coords.longitude,
+        lat: position.coords.latitude,
+      };
+
+      map.current?.flyTo({ center: [lngLat.lng, lngLat.lat], zoom: 14 });
+
+      await updateMarkerAndAddress(lngLat);
+    });
   };
 
   return (
@@ -150,25 +162,33 @@ const PickMap = ({
               accessToken={mapboxgl.accessToken}
               map={map.current}
               mapboxgl={mapboxgl}
-              placeholder="Search for address"
+              placeholder="Search for address or place"
               value={location}
               onChange={setLocation}
-              onRetrieve={(result) => {
-                const fullAddress =
-                  result.features[0].properties.full_address || "Unknown";
-                const coords = result.features[0].geometry.coordinates;
+              onRetrieve={(d) => {
+                const feature = d?.features?.[0];
+                if (!feature) return;
 
+                const fullAddress = feature?.properties?.full_address || "Unknown location";
+                const coords = feature?.geometry?.coordinates;
                 setLocation(fullAddress);
-                setAddress(fullAddress);
                 setLocationAddr(fullAddress);
+                setAddress(fullAddress);
                 setCoords(coords);
                 setLng(coords[0]);
                 setLat(coords[1]);
+                setZoom(14);
 
                 if (marker.current) marker.current.remove();
                 marker.current = new Marker().setLngLat(coords).addTo(map.current);
+
+                map.current.flyTo({ center: coords, zoom: 14 });
               }}
-              options={{ language: "en", country: "gh" }}
+              options={{
+                language: "en",
+                types: ["place", "poi", "address"],
+                // country: "gh", // optional: uncomment if you want to restrict search to Ghana
+              }}
             />
             <div className="text-sm mt-1">{address}</div>
           </div>
@@ -185,34 +205,29 @@ const PickMap = ({
           className="relative"
         ></div>
 
-        {route ? (
-          <div className="p-3">
-            <div className="flex items-center gap-2">
-              <span>You:</span> <FaLocationDot color="red" />
+        {route && (
+          <div>
+            <div className="flex m-2 items-center gap-1">
+              You: <FaLocationDot color="red" size={20} />
             </div>
-            <div className="flex items-center gap-2">
-              <span>Delivery Location:</span> <FaLocationDot color="green" />
+
+            <div className="flex m-2 items-center gap-1">
+              Delivery Location: <FaLocationDot color="#5f5" size={20} />
             </div>
           </div>
-        ) : (
-          <div className="flex justify-between p-3 border-t">
+        )}
+
+        {!route && (
+          <div className="mt-5 h-12 pl-5 border-t py-2 mb-2 flex gap-2">
             <button
-              className="bg-blue-700 text-white px-3 py-2 rounded shadow hover:shadow-lg"
-              onClick={() =>
-                navigator.geolocation.getCurrentPosition((pos) => {
-                  const coords = [pos.coords.longitude, pos.coords.latitude];
-                  setLng(coords[0]);
-                  setLat(coords[1]);
-                  setZoom(14);
-                  if (marker.current) marker.current.remove();
-                  marker.current = new Marker().setLngLat(coords).addTo(map.current);
-                })
-              }
+              className="border bg-blue-700 text-white px-2 py-1 rounded-md shadow-md hover:shadow-xl"
+              onClick={goToMyLocation}
             >
               My Location
             </button>
+
             <button
-              className="bg-green-700 text-white px-3 py-2 rounded shadow hover:shadow-lg"
+              className="border bg-green-700 text-white px-2 py-1 rounded-md shadow-md hover:shadow-xl"
               onClick={() => setShowMap(false)}
             >
               Use Location

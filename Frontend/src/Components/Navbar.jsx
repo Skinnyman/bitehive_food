@@ -36,8 +36,8 @@ const handleLogout = () => {
 
   return (
     <header
-      className={`fixed bg-white top-0 left-0 right-0 z-50 ${
-        darkmode ? 'bg-gray-900 text-white' : ''
+      className={`fixed bg-gray-100 top-0 left-0 right-0 z-50 ${
+        darkmode ? 'bg-[black] text-white' : ''
       } shadow-md border-2`}
     >
       <div className="container mx-auto px-4 py-3">
@@ -59,8 +59,8 @@ const handleLogout = () => {
               value={searchTerm}
               placeholder="Search for meals"
               onChange={(e)=> setSearchTerm(e.target.value)}
-              className={`flex-grow px-2 py-1 outline-none text-sm ${
-                darkmode ? 'bg-black' : ''
+              className={`flex-grow px-2 py-1 outline-none text-sm  ${
+                darkmode ? 'bg-black' : 'bg-gray-100'
               }`}
             />
             <MagnifyingGlassIcon className="h-5 w-5 text-gray-500" />

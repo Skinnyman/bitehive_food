@@ -27,9 +27,11 @@ const VendorSchema = new mongoose.Schema({
 		required: true,
 		
 	},
-    location: {
-        type:String,
-    }  
+	location: {
+		latitude: String,
+		longitude: String,
+		address: String, 
+	  } 
 })
 
 module.exports = mongoose.model("Vendor",VendorSchema);
