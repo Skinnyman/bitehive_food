@@ -95,6 +95,18 @@ router.get('/business', async (req,res)=> {
   }
  
 })
+router.get('/location', async (req,res)=> {
+  const {userId} = req.query;
+  try{
+    const business = await Vendor.find({userId});
+    if (!business) return res.status(404).json({ message: 'Vendor not found' });
+    res.json(business)
+  }catch(err){
+    res.json({error:'Failed to fetch business data'})
+  }
+ 
+})
+
 router.get('/allbusiness', async (req,res)=> {
   
   try{

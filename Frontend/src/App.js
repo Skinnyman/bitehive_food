@@ -8,10 +8,11 @@ import Client from './Pages/Client Page/Client';
 import VendorForm from './Pages/Vendor Form/VendorForm';
 import VendorProf from './Pages/Vendor Profile/VendorProf';
 import "mapbox-gl/dist/mapbox-gl.css";
+import Favorite from './Pages/Favorite Page/Favorite';
 
-// 🔐 Protected Route Component
+//  Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem('token'); // or any auth logic
+  const isAuthenticated = localStorage.getItem('token'); 
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
@@ -68,6 +69,16 @@ function App() {
                     
 
                       <VendorProf darkmode={darkmode} toggle={toggle} />
+                  
+                    </ProtectedRoute>
+                  }
+                />
+          <Route
+                  path="/favorite"
+                  element={
+                    <ProtectedRoute>
+                    
+                      <Favorite darkmode={darkmode} toggle={toggle} />
                   
                     </ProtectedRoute>
                   }

@@ -1,21 +1,55 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdOutlineDone, MdCancel } from "react-icons/md";
 import { IoStarSharp } from "react-icons/io5";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { serverport } from "../Static/Variables";
+import PickMap from "./PickMap";
+import { FaBusSimple } from "react-icons/fa6";
 
 
 function OrderInformation({order,fetchOrders}) {
   const [status, setStatus]= useState(order.status)
   const [rating, setRating] = useState(order.rating);
   const [editedRating, setEditedRating] = useState(false);
+  const [showMap,setShowMap] = useState(false)
+  const [routeCoords, setRouteCoords] = useState(null)
+ const [longitude,setLongitude] = useState("")
+ const [latitude,setlatitude] = useState("")
 
   const handleCancel = async()=>{
     await axios.patch(`${serverport}/api/order/status/${order._id}`, { status: "cancelled" });
     setStatus("cancelled");
     fetchOrders()
   }
+  const userId = order.userId
+  useEffect(() => {
+    axios.get(`${serverport}/api/vendor/location?userId=${userId}`)
+      .then(res => {
+        const vendor = res.data[0];
+        //console.log(vendor)
+        if (vendor) {
+          setLongitude(vendor.location.longitude);
+          setlatitude(vendor.location.latitude);
+        }
+      })
+      .catch(err => {
+        console.error("Failed to fetch vendor location:", err);
+      });
+  }, [userId]);
+
+  const handleShowMap = () => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const userCoords = [position.coords.longitude, position.coords.latitude];
+      const vendorCoords = [longitude, latitude];
+      setRouteCoords([userCoords, vendorCoords]);
+      setShowMap(true);
+    }, (error) => {
+      alert("Failed to get your location. Please allow location access.");
+    });
+  };
+  console.log("This is longitude",longitude,"This is the latitide",latitude)
+
 
 
   return (
@@ -65,14 +99,30 @@ function OrderInformation({order,fetchOrders}) {
           <MdOutlineDone className="mr-2" /> Order Accepted
         </div>
       )}
-      
-        {status === "completed" && (
+
+{order.deliveryOption === "pickup" && status === "completed" && (
         <>
-          <div className="mt-4 flex items-center text-green-700">
+          <div className="mt-4 text-green-700 flex items-center">
             <MdOutlineDone className="mr-2" />
             Order Completed
           </div>
 
+          {/* Pickup Meal Location Button */}
+          <button
+            onClick={handleShowMap}
+            className="mt-2 px-4 py-2 border rounded-md bg-blue-200 hover:bg-blue-300"
+          >
+            Pickup Meal Location
+          </button>
+
+          {/* Show Map */}
+          <PickMap
+            showMap={showMap}
+            setShowMap={setShowMap}
+            route={routeCoords}
+          />
+
+          {/* Rating Section */}
           <div className="flex mt-4 items-center border px-3 py-2">
             <span className="font-semibold mr-4">Rate:</span>
             {[1, 2, 3, 4, 5].map((num) => (
@@ -89,11 +139,11 @@ function OrderInformation({order,fetchOrders}) {
 
           {editedRating && (
             <button
-            onClick={async () => {
-              await axios.patch(`${serverport}/api/order/rate/${order._id}`, { rating });
-              alert(`You rated ${rating} star(s)`);
-              setEditedRating(false);
-            }}
+              onClick={async () => {
+                await axios.patch(`${serverport}/api/order/rate/${order._id}`, { rating });
+                alert(`You rated ${rating} star(s)`);
+                setEditedRating(false);
+              }}
               className="flex items-center border mt-2 px-3 py-2 bg-green-100 hover:bg-green-200"
             >
               <MdOutlineDone className="text-green-500 mr-2" />
@@ -102,6 +152,8 @@ function OrderInformation({order,fetchOrders}) {
           )}
         </>
       )}
+      
+     
       
 
       {/* Completed Order Actions */}
