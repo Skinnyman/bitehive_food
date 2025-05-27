@@ -23,7 +23,8 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "openai": "^4.10.0",
-    "paystack": "^2.0.1"
+    "paystack": "^2.0.1",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "jest": "^29.6.4",

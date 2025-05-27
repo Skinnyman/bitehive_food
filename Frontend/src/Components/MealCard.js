@@ -5,9 +5,21 @@ import axios from 'axios';
 import { useOrder } from '../context/OrderContext';
 import { motion } from "framer-motion";
 import { serverport } from '../Static/Variables';
+import io from "socket.io-client"
+const socket = io(serverport);
+
 
 function MealCard() {
-  const [meals, setMeals] = useState([]);
+  // useEffect(() => {
+  //   socket.on("receive_message", (data) => {
+  //     alert("message received",data.message)
+  //   });
+  
+  //   return () => {
+  //     socket.off("receive_message");
+  //   };
+  // }, [socket]);
+  const [meals, setMeals] = useState([]);  
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [price, setPrice] = useState(0);
@@ -77,6 +89,7 @@ function MealCard() {
     : price;
 
   const handleSubmitOrder = async () => {
+    socket.emit("place_order",{message:"New order recieved",vendorId:selectedMeal.userId})
     const orderData = {
       mealName: selectedMeal.name,
       mealId: selectedMeal._id,   
@@ -102,6 +115,7 @@ function MealCard() {
       console.log(err);
     }
     setShowModal(false);
+    
   };
 
   return (

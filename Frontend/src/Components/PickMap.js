@@ -5,7 +5,7 @@ import { IoCloseSharp } from "react-icons/io5";
 import { FaLocationDot } from "react-icons/fa6";
 
 mapboxgl.accessToken = "pk.eyJ1IjoiY3Jhemljb2RhIiwiYSI6ImNrbmVwYjJ2NzF0amwyb21yZ2VrYWUyamMifQ.fRl4FzY9JsIV21FbdfCHnQ";
-
+const token = process.env.REACT_APP_TOKEN;
 const PickMap = ({
   showMap = false,
   setShowMap = () => {},
@@ -23,6 +23,7 @@ const PickMap = ({
   const [location, setLocation] = useState("");
   const [address, setAddress] = useState("");
   const [watchId, setWatchId] = useState(null);
+
 
   const geocoding = useGeocodingCore({ accessToken: mapboxgl.accessToken });
 
@@ -65,19 +66,17 @@ const PickMap = ({
 
   const getRoute = async (start, end) => {
     if (!map.current) return;
-  
-    // Wait for map to fully load before modifying layers
     if (!map.current.loaded()) {
       map.current.once("load", () => getRoute(start, end));
       return;
     }
-  
+
     const res = await fetch(
       `https://api.mapbox.com/directions/v5/mapbox/cycling/${start[0]},${start[1]};${end[0]},${end[1]}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
     );
     const data = await res.json();
     const coords = data.routes[0].geometry.coordinates;
-  
+
     const routeGeoJSON = {
       type: "Feature",
       properties: {},
@@ -86,8 +85,7 @@ const PickMap = ({
         coordinates: coords,
       },
     };
-  
-    // Add or update route source
+
     if (map.current.getSource("route")) {
       map.current.getSource("route").setData(routeGeoJSON);
     } else {
@@ -95,7 +93,7 @@ const PickMap = ({
         type: "geojson",
         data: routeGeoJSON,
       });
-  
+
       map.current.addLayer({
         id: "route",
         type: "line",
@@ -111,14 +109,13 @@ const PickMap = ({
         },
       });
     }
-  
+
     new Marker({ color: "red" }).setLngLat(start).addTo(map.current);
     new Marker({ color: "green" }).setLngLat(end).addTo(map.current);
-  
+
     setLng(start[0]);
     setLat(start[1]);
   };
-  
 
   useEffect(() => {
     if (!showMap || map.current || !mapContainer.current) return;
@@ -164,11 +161,50 @@ const PickMap = ({
   }, [route]);
 
   const goToMyLocation = () => {
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const lngLat = { lng: position.coords.longitude, lat: position.coords.latitude };
-      map.current?.flyTo({ center: [lngLat.lng, lngLat.lat], zoom: 14 });
-      await updateMarkerAndAddress(lngLat);
-    });
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lng = position.coords.longitude;
+        const lat = position.coords.latitude;
+        const snapped = await mapMatchSnap(lng, lat);
+        const snappedLngLat = { lng: snapped[0], lat: snapped[1] };
+
+        map.current?.flyTo({
+          center: [snappedLngLat.lng, snappedLngLat.lat],
+          zoom: 16,
+          speed: 0.8,
+          curve: 1.5,
+          essential: true,
+        });
+
+        await updateMarkerAndAddress(snappedLngLat);
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            alert("Location access denied. Please enable location services.");
+            break;
+          case error.POSITION_UNAVAILABLE:
+            alert("Location unavailable. Try again later.");
+            break;
+          case error.TIMEOUT:
+            alert("Location request timed out. Try again.");
+            break;
+          default:
+            alert("An unknown error occurred while fetching location.");
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 1000,
+      }
+    );
   };
 
   return (
@@ -177,8 +213,7 @@ const PickMap = ({
         <div className="border-b flex justify-between items-center p-2">
           <div className="flex-1">
             <SearchBox
-              accessToken={mapboxgl.accessToken}
-              map={map.current}
+              accessToken={token}
               mapboxgl={mapboxgl}
               placeholder="Search for address or place"
               value={location}
@@ -199,7 +234,8 @@ const PickMap = ({
                 marker.current = new Marker().setLngLat(coords).addTo(map.current);
                 map.current.flyTo({ center: coords, zoom: 14 });
               }}
-              options={{ language: "en", types: ["place", "poi", "address"] }}
+              proximity={{ longitude: -0.186964, latitude: 5.614818 }}
+              options={{ language: "en", country: ["GH"], types: ["place", "poi", "address"] }}
             />
             <div className="text-sm mt-1">{address}</div>
           </div>

@@ -10,6 +10,7 @@ import VendorProf from './Pages/Vendor Profile/VendorProf';
 import "mapbox-gl/dist/mapbox-gl.css";
 import Favorite from './Pages/Favorite Page/Favorite';
 
+
 //  Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('token'); 
