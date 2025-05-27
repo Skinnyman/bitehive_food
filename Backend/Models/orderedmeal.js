@@ -26,6 +26,10 @@ userId:{
 cusId:{
   type:String
 },
+deliveryCharge: {
+  type: String,
+  default: "0",
+},
 status: {
     type: String,
     enum: ["pending","accepted","cancelled","completed"],

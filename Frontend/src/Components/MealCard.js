@@ -5,33 +5,34 @@ import axios from 'axios';
 import { useOrder } from '../context/OrderContext';
 import { motion } from "framer-motion";
 import { serverport } from '../Static/Variables';
-import io from "socket.io-client"
+import io from "socket.io-client";
+import PickMap from './PickMap';
+
 const socket = io(serverport);
 
-
 function MealCard() {
-  // useEffect(() => {
-  //   socket.on("receive_message", (data) => {
-  //     alert("message received",data.message)
-  //   });
-  
-  //   return () => {
-  //     socket.off("receive_message");
-  //   };
-  // }, [socket]);
-  const [meals, setMeals] = useState([]);  
+  const [meals, setMeals] = useState([]);
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [accompaniments, setAccompaniments] = useState([]);
   const [deliveryOption, setDeliveryOption] = useState("pickup");
-  const [contact, setContact] = useState("");
   const [showMap, setShowMap] = useState(false);
   const [location, setLocation] = useState("");
+    const [coords, setCoords] = useState([-1.6221, 6.923]);
+  const [formdata, setFormdata] = useState({
+    userId:"",
+    clientName: "",
+    contact_person_phone: "",
+    location: {
+      latitude: '',
+      longitude: '',
+      address: '',
+    },
+  });
 
-  const { order } = useOrder(); // <-- Changed here(
-  //console.log(order)
+  const { order } = useOrder();
   const userId = localStorage.getItem('id');
 
   useEffect(() => {
@@ -46,11 +47,13 @@ function MealCard() {
       });
   }, []);
 
-
   const handleOrderClick = (meal) => {
     setSelectedMeal(meal);
     setShowModal(true);
-
+    setFormdata(prev => ({
+      ...prev,
+      userId: meal.userId,
+    }));
     if (meal.chargeType === "price") {
       setPrice(parseInt(meal.price) || 0);
     } else if (meal.chargeType === "quantity") {
@@ -60,7 +63,6 @@ function MealCard() {
       setPrice(0);
       setQuantity(1);
     }
-
     setAccompaniments([]);
     setDeliveryOption("pickup");
   };
@@ -68,31 +70,24 @@ function MealCard() {
   const calculatePrice = (num) => {
     const number = parseInt(num);
     if (selectedMeal?.chargeType === "price") {
-      if (number < selectedMeal?.price) {
-        setPrice(selectedMeal?.price);
-      } else {
-        setPrice(number);
-      }
+      setPrice(Math.max(number, selectedMeal?.price));
     } else if (selectedMeal?.chargeType === "quantity") {
-      if (number < 1) {
-        setQuantity(1);
-        return;
-      }
-      setQuantity(number);
+      setQuantity(Math.max(1, number));
     }
   };
 
   const totalPrice = selectedMeal?.chargeType === "free"
     ? 0
     : selectedMeal?.chargeType === "quantity"
-    ? price * quantity
-    : price;
+      ? price * quantity
+      : price;
 
   const handleSubmitOrder = async () => {
-    socket.emit("place_order",{message:"New order recieved",vendorId:selectedMeal.userId})
+    socket.emit("place_order", { message: "New order recieved", vendorId: selectedMeal.userId });
+
     const orderData = {
       mealName: selectedMeal.name,
-      mealId: selectedMeal._id,   
+      mealId: selectedMeal._id,
       price: selectedMeal.price,
       quantity,
       totalPrice,
@@ -101,77 +96,77 @@ function MealCard() {
       accompaniments,
       chargeType: selectedMeal.chargeType,
       image: selectedMeal.image,
-      cusId:userId,
-     
+      cusId: userId,
     };
 
-    //addOrder(orderData); // <-- Add instead of replace
-    //console.log("Order submitted:", orderData);
     try {
       await axios.post(`${serverport}/api/order/ordered`, orderData);
-      //console.log("Success:", response.data.message || "order made");
-      
+      await axios.post(`${serverport}/api/order/deliveryinfo`, formdata);
     } catch (err) {
       console.log(err);
     }
+
     setShowModal(false);
-    
   };
+  //console.log("data",formdata)
 
   return (
-    <motion.div 
-    className="grid grid-cols-1 md:grid-cols-2 gap-10 p-6"
-    initial={{ opacity: 0, y: 40 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{duration:0.5}}
+    <motion.div
+      className="grid grid-cols-1 md:grid-cols-2 gap-10 p-6"
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
     >
-      {
-      meals.map((meal) =>
-        meal?.name
-							?.toLowerCase()
-							.includes(order.toLowerCase()) &&
-         (
-        <div key={meal._id} className="border w-[350px] h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center bg-white">
-          <div className="w-2/5 flex justify-center items-center">
-            <div className="h-36 w-36 bg-slate-400 rounded-xl overflow-hidden">
-              <img
-                src={`${serverport}/${meal.image}`}
-                alt={meal.name}
-                className="h-full w-full object-cover rounded-xl"
-              />
-            </div>
-          </div>
-          <div className="w-3/5 flex flex-col justify-between p-2">
-            <div>
-              <div className="font-bold text-lg mb-1">{meal.name}</div>
-              <div className="text-sm text-gray-600 break-words whitespace-normal">{meal.description}</div>
-            </div>
-            <div className="flex flex-row justify-between items-center mt-2">
-              <div className="text-xl font-bold">₵ {meal.price}</div>
-            </div>
-            <div className="flex flex-row justify-between items-center mt-2">
-              <div className="w-14 h-8 bg-slate-900 text-white flex items-center justify-center rounded-lg text-sm font-bold">
-                {meal.mealType?.substring(0, 6)}
+      {meals.map((meal) =>
+        meal?.name?.toLowerCase().includes(order.toLowerCase()) && (
+          <div key={meal._id} className="border w-[350px] h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center bg-white">
+            <div className="w-2/5 flex justify-center items-center">
+              <div className="h-36 w-36 bg-slate-400 rounded-xl overflow-hidden">
+                <img
+                  src={`${serverport}/${meal.image}`}
+                  alt={meal.name}
+                  className="h-full w-full object-cover rounded-xl"
+                />
               </div>
-              <div className="w-[30%] h-8 bg-slate-900 text-white flex items-center justify-center rounded-lg text-sm font-bold">
-                <FaStar className="text-yellow-500 mr-1" />
-                3
+            </div>
+            <div className="w-3/5 flex flex-col justify-between p-2">
+              <div>
+                <div className="font-bold text-lg mb-1">{meal.name}</div>
+                <div className="text-sm text-gray-600 break-words whitespace-normal">{meal.description}</div>
               </div>
-              <div
-                onClick={() => handleOrderClick(meal)}
-                className="w-[40%] h-8 bg-slate-900 text-white flex items-center justify-center rounded-lg text-sm font-bold hover:shadow-lg cursor-pointer"
-              >
-                <FaCartShopping className="mr-1" />
-                Order
+              <div className="flex flex-row justify-between items-center mt-2">
+                <div className="text-xl font-bold">₵ {meal.price}</div>
+              </div>
+              <div className="flex flex-row justify-between items-center mt-2">
+                <div className="w-14 h-8 bg-slate-900 text-white flex items-center justify-center rounded-lg text-sm font-bold">
+                  {meal.mealType?.substring(0, 6)}
+                </div>
+                <div className="w-[30%] h-8 bg-slate-900 text-white flex items-center justify-center rounded-lg text-sm font-bold">
+                  <FaStar className="text-yellow-500 mr-1" />
+                  3
+                </div>
+                <div
+                  onClick={() => handleOrderClick(meal)}
+                  className="w-[40%] h-8 bg-slate-900 text-white flex items-center justify-center rounded-lg text-sm font-bold hover:shadow-lg cursor-pointer"
+                >
+                  <FaCartShopping className="mr-1" />
+                  Order
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        )
+      )}
 
       {showModal && selectedMeal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center px-4" onClick={() => setShowModal(false)}>
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center px-4 py-6"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex w-full justify-center items-center mb-2">
               <span className="font-bold text-2xl">Place Order</span>
             </div>
@@ -188,22 +183,20 @@ function MealCard() {
                   {selectedMeal.chargeType === "price"
                     ? "Custom price"
                     : selectedMeal.chargeType === "free"
-                    ? "Free meal"
-                    : "Price per quantity"}
+                      ? "Free meal"
+                      : "Price per quantity"}
                 </span>
                 <span className="text-sm font-bold">₵ {selectedMeal.price}</span>
               </div>
               <div className="flex flex-row w-full justify-between">
                 <span className="text-lg font-bold">{selectedMeal.name}</span>
                 {selectedMeal.chargeType !== "free" && (
-                  <div className="flex flex-row border items-center">
-                    <input
-                      type="number"
-                      className="w-14 outline-none px-1"
-                      value={selectedMeal.chargeType === "price" ? price : quantity}
-                      onChange={(e) => calculatePrice(e.target.value)}
-                    />
-                  </div>
+                  <input
+                    type="number"
+                    className="w-14 border outline-none px-1"
+                    value={selectedMeal.chargeType === "price" ? price : quantity}
+                    onChange={(e) => calculatePrice(e.target.value)}
+                  />
                 )}
               </div>
               <div className="w-full mt-2 font-bold break-words whitespace-normal">
@@ -243,43 +236,69 @@ function MealCard() {
                   <option value="delivery">Delivery</option>
                 </select>
               </div>
-      {deliveryOption === "delivery" && (
-						<>
-							<input
-								id="contact"
-								name={"Your Contact"}
-								value={contact}
-								onChange={(e) => setContact(e.target.value)}
-								type={"tel"}
-                className='my-3 border w-[100%] py-2 rounded-md shadow-md'
-								placeholder={"+233 055......"}
-							/>
-							<div
-								className="my-3 border w-[100%] py-2 rounded-md shadow-md hover:shadow-xl text-center cursor-pointer"
-								onClick={() => setShowMap(true)}
-							>
-								{!location ? "Pick location" : location}
-							</div>
-						</>
-					)}
+
+              {deliveryOption === "delivery" && (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Enter your name..."
+                    value={formdata.clientName}
+                    onChange={(e) => setFormdata({ ...formdata, clientName: e.target.value })}
+                    className="my-3 border w-full py-2 rounded-md shadow-md"
+                  />
+                  <input
+                    type="tel"
+                    placeholder="+233 055......"
+                    value={formdata.contact_person_phone}
+                    onChange={(e) => setFormdata({ ...formdata, contact_person_phone: e.target.value })}
+                    className="my-3 border w-full py-2 rounded-md shadow-md"
+                  />
+                      {/* Map Picker */}
+                          <PickMap
+                            showMap={showMap}
+                            setShowMap={setShowMap}
+                            setCoords={(coord) => {
+                              setCoords(coord);
+                              setFormdata((prev) => ({
+                                ...prev,
+                                location: {
+                                  ...prev.location,
+                                  longitude: coord[0],
+                                  latitude: coord[1],
+                                },
+                              }));
+                            }}
+                            setLocationAddr={(addr) => {
+                              setFormdata((prev) => ({
+                                ...prev,
+                                location: {
+                                  ...prev.location,
+                                  address: addr,
+                                },
+                              }));
+                            }}
+                          />
+                  <div
+                    className="my-3 border w-full py-2 rounded-md shadow-md hover:shadow-xl text-center cursor-pointer"
+                    onClick={() => setShowMap(true)}
+                  >
+                    {!formdata.location.address ? "Pick location" :  formdata.location.address}
+                  </div>
+                </>
+              )}
 
               <div className="w-full flex flex-row justify-between items-center mt-4">
                 <div>
                   <span className="text-sm font-bold mr-2">Total: </span>
-                  <span className="text-sm text-red-500 font-bold">
-                    GHC {totalPrice}
-                  </span>
+                  <span className="text-sm text-red-500 font-bold">GHC {totalPrice}</span>
                 </div>
-                <div>
-                  <button
-                    type="submit"
-                    className="w-full px-4 p-2 bg-blue-500 text-white rounded-md"
-                    disabled={totalPrice === 0}
-                    onClick={handleSubmitOrder}
-                  >
-                    Order
-                  </button>
-                </div>
+                <button
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                  onClick={handleSubmitOrder}
+                  disabled={totalPrice === 0}
+                >
+                  Order
+                </button>
               </div>
             </div>
           </div>

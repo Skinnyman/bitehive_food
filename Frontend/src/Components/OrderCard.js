@@ -48,7 +48,7 @@ function OrderInformation({order,fetchOrders}) {
       alert("Failed to get your location. Please allow location access.");
     });
   };
-  console.log("This is longitude",longitude,"This is the latitide",latitude)
+  //console.log("This is longitude",longitude,"This is the latitide",latitude)
 
 
 
@@ -71,6 +71,7 @@ function OrderInformation({order,fetchOrders}) {
       <PropValue property="Price:" value={`GHC ${order.price}`} />
       <PropValue property="Quantity:" value={order.quantity || 1} />
       <PropValue property="Type:" value={order.deliveryOption} />
+      <PropValue property="Delivery Fee:" value={order.deliveryCharge} />
       <PropValue property="Status:" value={status} />
       <PropValue property="Total Price:" value={`GHC ${order.totalPrice}`} />
       </div>
@@ -121,6 +122,44 @@ function OrderInformation({order,fetchOrders}) {
             setShowMap={setShowMap}
             route={routeCoords}
           />
+
+          {/* Rating Section */}
+          <div className="flex mt-4 items-center border px-3 py-2">
+            <span className="font-semibold mr-4">Rate:</span>
+            {[1, 2, 3, 4, 5].map((num) => (
+              <IoStarSharp
+                key={num}
+                onClick={() => {
+                  setRating(num);
+                  setEditedRating(true);
+                }}
+                className={`mr-2 ${rating >= num ? "text-yellow-400" : "text-gray-300"} cursor-pointer`}
+              />
+            ))}
+          </div>
+
+          {editedRating && (
+            <button
+              onClick={async () => {
+                await axios.patch(`${serverport}/api/order/rate/${order._id}`, { rating });
+                alert(`You rated ${rating} star(s)`);
+                setEditedRating(false);
+              }}
+              className="flex items-center border mt-2 px-3 py-2 bg-green-100 hover:bg-green-200"
+            >
+              <MdOutlineDone className="text-green-500 mr-2" />
+              Submit Rating
+            </button>
+          )}
+        </>
+      )}
+{order.deliveryOption === "delivery" && status === "completed" && (
+        <>
+          <div className="mt-4 text-green-700 flex items-center">
+            <MdOutlineDone className="mr-2" />
+            Order Completed,waiting for driver
+          </div>
+
 
           {/* Rating Section */}
           <div className="flex mt-4 items-center border px-3 py-2">

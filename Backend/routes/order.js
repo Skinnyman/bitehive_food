@@ -1,15 +1,83 @@
 const express = require("express")
-const Order = require("../Models/order")
 const orderedMeal = require("../Models/orderedmeal");
+const delivery = require("../Models/delivery_info");
 
 const router = express.Router();
 // Storing all orders in the database
 router.post("/ordered",async(req,res) =>{
- const{mealName,mealId, price,quantity,deliveryOption,totalPrice,userId,cusId}= req.body;
- const ordered = await orderedMeal.create({mealName,mealId, price,quantity,deliveryOption,totalPrice,userId,cusId});
+ const{mealName,mealId, price,quantity,deliveryOption,totalPrice,userId,cusId,deliveryCharge}= req.body;
+ const ordered = await orderedMeal.create({mealName,mealId, price,quantity,deliveryOption,totalPrice,userId,cusId,deliveryCharge});
     res.status(201).json(ordered);    
 
 })
+
+// Adding deliveryfee
+router.patch("/deliveryfee", async (req, res) => {
+  const { deliveryCharge, userId, order_id } = req.body;
+  //console.log("PATCH /deliveryfee payload:", req.body);
+
+  try {
+    const updatedOrder = await orderedMeal.findOneAndUpdate(
+      { userId:userId, _id: order_id },
+      {
+        $set: { deliveryCharge },
+      },
+      { new: true, upsert: true }
+    );
+
+   // console.log("Updated order:", updatedOrder);
+
+    res.status(200).json(updatedOrder);
+  } catch (error) {
+    console.error("Error in /deliveryfee route:", error);
+    res.status(500).json({ message: "Failed to update delivery fee", error });
+  }
+});
+
+//Getting delivery information from the user
+router.post("/deliveryinfo",async(req,res) =>{
+ const{userId, Deliveryman, Deliveryphone,contact_person_phone, location, clientName}= req.body;
+ const ordered = await delivery.create({userId,Deliveryman, Deliveryphone,contact_person_phone, location, clientName});
+    res.status(201).json(ordered);    
+
+})
+// updating the data with deliveryman and deliveryphone
+router.patch("/deliveryinfo", async (req, res) => {
+  const { Deliveryman, Deliveryphone, userId } = req.body;
+
+  try {
+    const updatedOrder = await delivery.findOneAndUpdate(
+      { userId: userId }, // only compare with userId
+      {
+        $set: {
+          Deliveryman,
+          Deliveryphone,
+        },
+      },
+      { new: true, upsert: true } // creates one if it doesn't exist
+    );
+
+    res.status(200).json(updatedOrder);
+    console.log(req.query)
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update delivery info", error });
+  }
+});
+
+
+//Getting the location
+router.get('/location', async (req,res)=> {
+  const {userId} = req.query;
+  try{
+    const business = await delivery.find({userId});
+    if (!business) return res.status(404).json({ message: 'location not found' });
+    res.json(business)
+  }catch(err){
+    res.json({error:'Failed to fetch business data'})
+  }
+ 
+})
+
 
 
 // Getting all orders 

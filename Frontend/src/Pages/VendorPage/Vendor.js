@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
@@ -10,8 +10,27 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Profile from '../Profile page/Profile';
 import Product from '../Product Page/Product';
 import Order from '../Vendor order page/Order';
+import { serverport } from '../../Static/Variables';
+import io from "socket.io-client";
+
+const socket = io(serverport);
 
 function Vendor() {
+     useEffect(() => {
+        const vendorId = localStorage.getItem("id"); 
+        if (vendorId) {
+          socket.emit("registerVendor", vendorId);
+        }
+        socket.on('newOrder', (data) => {
+          alert(data.message);
+          // Optionally update state to show the order in UI
+        });
+    
+        return () => {
+          socket.off('newOrder');
+        };
+      
+      });
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [activePage, setActivePage] = useState('Profile');

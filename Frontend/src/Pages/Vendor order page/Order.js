@@ -1,15 +1,74 @@
 import React, { useEffect, useState } from "react";
-import { MdOutlineDone, MdCancel } from "react-icons/md";
+import { MdOutlineDone, MdCancel,MdOutlineShare } from "react-icons/md";
 import { IoStarSharp } from "react-icons/io5";
 import axios from "axios";
 import { serverport } from "../../Static/Variables";
+import PickMap from "../../Components/PickMap";
 
 
 
 function Order() {
   //const [rating, setRating] = useState(0);
   //const [editedRating, setEditedRating] = useState(false);
-  const [allorder,setAllOrder] = useState([])
+  const [allorder,setAllOrder] = useState([]);
+   const [showMap,setShowMap] = useState(false);
+    const [routeCoords, setRouteCoords] = useState(null);
+   const [longitude,setLongitude] = useState("");
+   const [latitude,setlatitude] = useState("");
+   const userId = localStorage.getItem("id");
+
+    //  const [formdata, setFormdata] = useState({
+    //    userId:userId,
+    //    Deliveryman:"",
+    //    Deliveryphone:"",
+    //  });
+    //  const [fee,setfee] = useState({
+    //   orderId:"",
+    //   userId:userId,
+    //   deliveryCharge:""
+    //  })
+   //console.log("data",fee)
+   const [formdata, setFormdata] = useState({});
+const [fee, setfee] = useState({});
+
+
+   const senddata = async () =>{
+      
+    try {
+      await axios.patch(`${serverport}/api/order/deliveryinfo`, formdata);
+      await axios.patch(`${serverport}/api/order/deliveryfee`, fee);
+    } catch (err) {
+      console.log(err);
+    }
+   };
+   //console.log("data",formdata)
+   
+
+   useEffect(() => {
+    axios.get(`${serverport}/api/order/location?userId=${userId}`)
+      .then(res => {
+        const vendor = res.data[0];
+        //console.log(vendor)
+        if (vendor) {
+          setLongitude(vendor.location.longitude);
+          setlatitude(vendor.location.latitude);
+        }
+      })
+      .catch(err => {
+        console.error("Failed to fetch vendor location:", err);
+      });
+  }, [userId]);
+
+  const handleShowMap = () => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const userCoords = [position.coords.longitude, position.coords.latitude];
+      const vendorCoords = [longitude, latitude];
+      setRouteCoords([userCoords, vendorCoords]);
+      setShowMap(true);
+    }, (error) => {
+      alert("Failed to get your location. Please allow location access.");
+    });
+  };
 
   const fetchOrders = async()=>{
     const userId = localStorage.getItem('id');
@@ -54,6 +113,7 @@ function Order() {
       <PropValue property="Price:" value={`GHC ${order.price}`} />
       <PropValue property="Quantity:" value={order.quantity || 1} />
       <PropValue property="Type:" value={order.deliveryOption} />
+      <PropValue property="Delivery Fee:" value={order.deliveryCharge} />
       <PropValue property="Status:" value={order.status} />
       <PropValue property="Total Price:" value={`GHC ${order.totalPrice}`} />
     </div>
@@ -72,7 +132,14 @@ function Order() {
 
 
     {/* Completed Order Actions */}
-    {order.status === "accepted" && (
+    {order.status === "accepted" && order.deliveryOption === "pickup"  && (
+              <div className="flex mt-3">
+                <button onClick={() => updateStatus(order._id, "completed")} className="flex items-center border px-3 py-2 bg-green-200 hover:bg-green-300">
+                  <MdOutlineDone className="text-green-600 mr-2" /> Mark as Ready
+                </button>
+              </div>
+            )}
+    {order.status === "accepted" && order.deliveryOption === "delivery"  && (
               <div className="flex mt-3">
                 <button onClick={() => updateStatus(order._id, "completed")} className="flex items-center border px-3 py-2 bg-green-200 hover:bg-green-300">
                   <MdOutlineDone className="text-green-600 mr-2" /> Mark as Ready
@@ -80,7 +147,7 @@ function Order() {
               </div>
             )}
 
-{order.status === "completed" && (
+{order.status === "completed"  &&  order.deliveryOption === "pickup" &&(
             <div className="flex flex-col mt-3 text-green-700 font-semibold">
                 <div className="flex items-center">
                 <MdOutlineDone className="mr-2" />
@@ -96,13 +163,103 @@ function Order() {
                 )}
             </div>
 )}
-            {order.status === "cancelled" && (
+ {order.status === "cancelled" && (
               <div className="flex items-center mt-3 text-red-600 font-semibold">
                 <MdCancel className="mr-2" />
                 Order Cancelled
               </div>
             )}
-            
+{order.status === "completed" &&  order.deliveryOption === "delivery"  &&(
+            <div className="flex flex-col mt-3 text-green-700 font-semibold">
+                          <button
+                        onClick={handleShowMap}
+                        className="mt-2 px-4 py-2 border rounded-md bg-blue-200 hover:bg-blue-300"
+                      >
+                        Show Delivery location
+                      </button>
+
+                      {/* Show Map */}
+                      <PickMap
+                        showMap={showMap}
+                        setShowMap={setShowMap}
+                        route={routeCoords}
+                      />
+                             <input
+                                onChange={(e) =>
+                                  setFormdata({
+                                    ...formdata,
+                                    [order._id]: {
+                                      ...(formdata[order._id] || {}),
+                                      Deliveryman: e.target.value,
+                                      userId: userId
+                                    },
+                                  })
+                                }
+                                value={formdata[order._id]?.Deliveryman || ""}
+                                placeholder="Enter rider's name"
+                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                                <input
+                                  onChange={(e) =>
+                                    setFormdata({
+                                      ...formdata,
+                                      [order._id]: {
+                                        ...(formdata[order._id] || {}),
+                                        Deliveryphone: e.target.value,
+                                        userId: userId
+                                      },
+                                    })
+                                  }
+                                  value={formdata[order._id]?.Deliveryphone || ""}
+                                  placeholder="+233 055......"
+                                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+
+                      <label>Delivery Fee:</label>
+                    <input
+                        type="number"
+                        onChange={(e) => {
+                          const value = Math.max(0, Number(e.target.value));
+                          setfee({
+                            ...fee,
+                            [order._id]: {
+                              deliveryCharge: value,
+                              orderId: order._id,
+                              userId: userId
+                            },
+                          });
+                        }}
+                        value={fee[order._id]?.deliveryCharge || ""}
+                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                                  <div className="flex cursor-pointer flex-row items-center border px-3 py-3 mt-2 hover:bg-green-200"
+						       onClick={senddata}
+					>
+						<MdOutlineDone className={`text-green-500 mr-2`} size={22} />
+						<span>Submit Delivery Info</span>
+					</div>
+          <div
+						className="flex cursor-pointer flex-row items-center border px-3 py-3 mt-2 hover:bg-green-200"
+					>
+						<MdOutlineShare className={`text-green-500 mr-2`} size={22} />
+						<span>Share Delivery Location</span>
+					</div>
+
+
+                {/* <div className="flex items-center">
+                <MdOutlineDone className="mr-2" />
+                Order Completed
+                </div> */}
+                {/* {order.rating > 0 && (
+                <div className="flex items-center mt-2">
+                    <span className="mr-2">Rating:</span>
+                    {[...Array(order.rating)].map((_, i) => (
+                    <IoStarSharp key={i} className="text-yellow-400 mr-1" />
+                    ))}
+                </div>
+                )} */}
+            </div>
+)}            
     
 
     {/* Rating Section */}
