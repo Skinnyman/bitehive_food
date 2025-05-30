@@ -122,7 +122,7 @@ function OrderInformation({order,fetchOrders}) {
             route={routeCoords}
           />
 
-          {/* Rating Section */}
+         {/* Rating Section */}
           <div className="flex mt-4 items-center border px-3 py-2">
             <span className="font-semibold mr-4">Rate:</span>
             {[1, 2, 3, 4, 5].map((num) => (
