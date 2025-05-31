@@ -15,8 +15,16 @@ const upload = multer({ storage});
 router.post('/addmeal', upload.single('image'), async (req, res) => {
     const{userId,name,mealType,price,chargeType,description,accompaniment}= req.body;
     const image = req.file ? req.file.path : '';
-    const meal = await Meal.create({userId,name,image,mealType,price,chargeType,description,accompaniment});
+    // Parse accompaniment if it's a JSON string
+    let parsedAccompaniment;
+    try {
+      parsedAccompaniment = JSON.parse(accompaniment);
+    } catch (error) {
+      parsedAccompaniment = []; // fallback
+    }
+    const meal = await Meal.create({userId,name,image,mealType,price,chargeType,description,accompaniment: parsedAccompaniment});
     res.status(201).json(meal);  
+    console.log(meal)
   });
 
  // showing product at the product listing according to the vendor 
@@ -39,9 +47,11 @@ router.post('/addmeal', upload.single('image'), async (req, res) => {
       const meal = await Meal.find();
       if (!meal) return res.status(404).json({ message: 'Meal not found' });
       res.json(meal)
+  
     }catch(err){
       res.json({error:'Failed to fetch business data'})
     }
+   
    
   })
 
