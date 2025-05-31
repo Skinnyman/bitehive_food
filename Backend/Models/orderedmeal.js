@@ -20,6 +20,9 @@ const orderedMealSchema = new mongoose.Schema({
 deliveryOption:{
     type:String
 },
+deliveryCharge:{
+    type:String
+},
 userId:{
     type:String
 },

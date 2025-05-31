@@ -27,7 +27,7 @@ router.patch("/deliveryfee", async (req, res) => {
     }
 
     res.status(200).json(updatedOrder);
-    
+    console.log(updatedOrder)
   } catch (error) {
     console.error("Error in /deliveryfee route:", error);
     res.status(500).json({ message: "Failed to update delivery fee", error });
