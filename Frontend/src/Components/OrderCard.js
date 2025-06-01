@@ -8,7 +8,9 @@ import PickMap from "./PickMap";
 import { FaBusSimple } from "react-icons/fa6";
 
 
-function OrderInformation({order,fetchOrders}) {
+
+
+function OrderInformation({order,fetchOrders,info}) {
   const [status, setStatus]= useState(order.status)
   const [rating, setRating] = useState(order.rating);
   const [editedRating, setEditedRating] = useState(false);
@@ -16,6 +18,8 @@ function OrderInformation({order,fetchOrders}) {
   const [routeCoords, setRouteCoords] = useState(null)
  const [longitude,setLongitude] = useState("")
  const [latitude,setlatitude] = useState("")
+
+
 
   const handleCancel = async()=>{
     await axios.patch(`${serverport}/api/order/status/${order._id}`, { status: "cancelled" });
@@ -50,7 +54,18 @@ function OrderInformation({order,fetchOrders}) {
   };
   //console.log("This is longitude",longitude,"This is the latitide",latitude)
 
+  //console.log("data",orderId)
+  
+    //console.log("Info",info)
 
+  // useEffect( async()=>{
+  //   try {
+  //     const res = await axios.get(`${serverport}/api/order/getInfo?_id=${orderId}`);
+  //     setInfo(res.data);
+  //   } catch (err) {
+  //     console.error("Failed to fetch order info:", err);
+  //   }
+  // },[])
 
   return (
     <motion.div 
@@ -76,9 +91,16 @@ function OrderInformation({order,fetchOrders}) {
       <PropValue property="Total Price:" value={`GHC ${order.totalPrice}`} />
       
         {/* New Delivery Status PropValue when delivery and completed */}
-        {order.deliveryOption === "delivery" && status === "completed" && (
+        {order.deliveryOption === "delivery" && status === "search" && (
           <PropValue property="Delivery Status:" value="Looking for driver" />
         )}
+       {order.deliveryOption === "delivery" && status === "completed" && (
+  <>
+    <PropValue property="Delivery Status:" value="Driver assigned" />
+    <PropValue property="Rider's Name:" value={info.Deliveryman} />
+    <PropValue property="Rider's Contact:" value={info.Deliveryphone} />
+  </>
+)}
       </div>
 
       {/* Order Action Buttons */}
@@ -158,7 +180,7 @@ function OrderInformation({order,fetchOrders}) {
           )}
         </>
       )}
-{order.deliveryOption === "delivery" && status === "completed" && (
+{order.deliveryOption === "delivery" && status === "search" && (
         <>
           <div className="mt-4 text-green-700 flex items-center">
             <MdOutlineDone className="mr-2" />
@@ -197,6 +219,12 @@ function OrderInformation({order,fetchOrders}) {
         </>
       )}
       
+      {order.deliveryOption == "delivery" && status === "completed" && (
+          <div className="flex flex-row items-center border px-3 py-2 cursor-pointer hover:shadow-xl hover:bg-green-200">
+          <MdOutlineDone className="text-green-500 mr-2" size={22} />
+          <span>Mark As Order Received</span>
+        </div>
+      )}
      
       
 

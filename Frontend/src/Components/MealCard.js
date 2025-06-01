@@ -3,6 +3,7 @@ import { FaStar } from "react-icons/fa";
 import { FaCartShopping } from "react-icons/fa6";
 import axios from 'axios';
 import { useOrder } from '../context/OrderContext';
+import { useOd } from '../context/InfoContext';
 import { motion } from "framer-motion";
 import { serverport } from '../Static/Variables';
 import io from "socket.io-client";
@@ -42,7 +43,8 @@ function MealCard() {
     },
   });
 
-  const { order } = useOrder(); // <-- Changed here(
+  const { orders,setOrder } = useOrder(); // <-- Changed here
+  const {od,setOd} = useOd();
   //console.log(order)
   const userId = localStorage.getItem('id');
 
@@ -62,6 +64,10 @@ function MealCard() {
   const handleOrderClick = (meal) => {
     setSelectedMeal(meal);
     setShowModal(true);
+    setFormdata(prev => ({
+      ...prev,
+      userId: meal.userId,
+    }));
 
     if (meal.chargeType === "price") {
       setPrice(parseInt(meal.price) || 0);
@@ -120,15 +126,24 @@ function MealCard() {
     //addOrder(orderData); // <-- Add instead of replace
     //console.log("Order submitted:", orderData);
     try {
-      await axios.post(`${serverport}/api/order/ordered`, orderData);
-      //console.log("Success:", response.data.message || "order made");
-      
+     const response =  await axios.post(`${serverport}/api/order/ordered`, orderData);
+     const newOrderId = response.data._id;
+     const updatedFormData = {
+      ...formdata,
+      orderId: newOrderId,
+    };
+ 
+      const info = await axios.post(`${serverport}/api/order/deliveryInfo`,updatedFormData);
+      const deliveryInfoId = info.data._id;
+       setOd(deliveryInfoId);
+    
     } catch (err) {
       console.log(err);
     }
     setShowModal(false);
     
   };
+ 
 
   return (
     <motion.div 
@@ -141,7 +156,7 @@ function MealCard() {
       meals.slice().reverse().map((meal) =>
         meal?.name
 							?.toLowerCase()
-							.includes(order.toLowerCase()) &&
+							.includes(orders.toLowerCase()) &&
          (
         <div key={meal._id} className="border w-[350px] h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center bg-white">
           <div className="w-2/5 flex justify-center items-center">
@@ -250,7 +265,7 @@ function MealCard() {
                                 }
                               }
 
-                              console.log("data", accompaniments);
+                              //console.log("data", accompaniments);
                             }}
                           />
                           <label className="block text-gray-500 font-semibold text-sm">

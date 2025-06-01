@@ -83,6 +83,7 @@ function Order() {
       console.error("Error submitting delivery data:", err);
     }
   };
+  
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-14">
@@ -121,10 +122,20 @@ function Order() {
             </div>
           )}
 
-          {order.status === "accepted" && (
+          {order.status === "accepted" && order.deliveryOption === "pickup" && (
             <div className="flex mt-3">
               <button
-                onClick={() => updateStatus(order._id, "completed")}
+                onClick={async () => updateStatus(order._id, "completed")}
+                className="flex items-center border px-3 py-2 bg-green-200 hover:bg-green-300"
+              >
+                <MdOutlineDone className="text-green-600 mr-2" /> Mark as Ready
+              </button>
+            </div>
+          )}
+          {order.status === "accepted" && order.deliveryOption === "delivery" && (
+            <div className="flex mt-3">
+              <button
+                onClick={() => updateStatus(order._id, "search")}
                 className="flex items-center border px-3 py-2 bg-green-200 hover:bg-green-300"
               >
                 <MdOutlineDone className="text-green-600 mr-2" /> Mark as Ready
@@ -149,7 +160,7 @@ function Order() {
             </div>
           )}
 
-          {order.status === "completed" && order.deliveryOption === "delivery" && (
+          {order.status === "search" && order.deliveryOption === "delivery" && (
             <div className="flex flex-col mt-3 text-green-700 font-semibold">
               <button
                 onClick={() => handleShowMap(order)}
@@ -161,13 +172,6 @@ function Order() {
               {showMap && selectedOrderLocation === order._id && (
                 <PickMap showMap={showMap} setShowMap={setShowMap} route={routeCoords} />
               )}
-
-              {(order.Deliveryman || order.Deliveryphone || order.deliveryCharge) ? (
-                <div className="flex items-center border px-3 py-3 bg-green-300 text-green-900 font-semibold select-none mt-4">
-                  <MdOutlineDone className="mr-2" size={22} />
-                  <span>This order is being delivered</span>
-                </div>
-              ) : (
                 <>
                   <input
                     onChange={(e) =>
@@ -219,8 +223,12 @@ function Order() {
                   />
                   <div
                     className="flex cursor-pointer flex-row items-center border px-3 py-3 mt-3 hover:bg-green-200"
-                    onClick={() => senddata(order._id)}
+                    onClick={async () => {
+                      await senddata(order._id); 
+                      updateStatus(order._id, "completed"); 
+                    }}
                   >
+                    
                     <MdOutlineDone className={`text-green-500 mr-2`} size={22} />
                     <span>Submit Delivery Info</span>
                   </div>
@@ -230,8 +238,14 @@ function Order() {
                     <span>Share Delivery Location</span>
                   </div>
                 </>
-              )}
+              
             </div>
+          )}
+          {order.status === "completed" && order.deliveryOption === "delivery" && (
+            <div className="flex items-center border px-3 py-3 bg-green-300 text-green-900 font-semibold select-none mt-4">
+            <MdOutlineDone className="mr-2" size={22} />
+            <span>This order is being delivered</span>
+          </div>
           )}
 
           {order.status === "cancelled" && (

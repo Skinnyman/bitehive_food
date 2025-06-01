@@ -4,15 +4,17 @@ import React, { createContext, useContext, useState } from 'react';
 const OrderContext = createContext();
 
 // Custom hook for consuming the context
-export const useOrder = () => useContext(OrderContext);
+export const useOd = () => useContext(OrderContext);
 
 // Provider component to wrap around your app
-export const OrderProvider = ({ children }) => {
-  const [orders, setOrder] = useState("");
+export const OrderProviders = ({ children }) => {
+  const [od, setOd] = useState("");
 
   return (
-    <OrderContext.Provider value={{ orders, setOrder }}>
+    <OrderContext.Provider value={{ od, setOd }}>
       {children}
     </OrderContext.Provider>
   );
 };
+
+

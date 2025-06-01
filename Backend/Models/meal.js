@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const accompaniment = require("./accompaniment");
+
 
 
 const MealSchema = new mongoose.Schema({

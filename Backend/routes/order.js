@@ -27,7 +27,7 @@ router.patch("/deliveryfee", async (req, res) => {
     }
 
     res.status(200).json(updatedOrder);
-    console.log(updatedOrder)
+   // console.log(updatedOrder)
   } catch (error) {
     console.error("Error in /deliveryfee route:", error);
     res.status(500).json({ message: "Failed to update delivery fee", error });
@@ -59,12 +59,26 @@ router.patch("/deliveryinfo", async (req, res) => {
     );
 
     res.status(200).json(updatedOrder);
-    console.log("data",req.body)
+    //console.log("data",req.body)
   } catch (error) {
     res.status(500).json({ message: "Failed to update delivery info", error });
   }
 });
 
+// Getting deliveryInfo
+router.get("/getInfo", async(req,res)=>{
+  const {_id} = req.query;
+  //console.log(_id);
+ try{
+    const info = await delivery.findOne({_id});
+    if (!info) return res.status(404).json({ message: 'Delivery Information not found' });
+    res.json(info)
+    //console.log(info)
+
+ }catch(err){
+  res.json ({error:"Failed to get Info"})
+ }
+})
 
 //Getting the location
 router.get('/location', async (req,res)=> {

@@ -3,10 +3,14 @@ import OrderCard from '../../Components/OrderCard';
 import axios from 'axios';
 import { useOrder } from '../../context/OrderContext';
 import { serverport } from '../../Static/Variables';
+import { useOd } from '../../context/InfoContext';
+
 
 function Order() {
-const { order } = useOrder();
+const { orders } = useOrder();
   const [allorder,setAllOrder] = useState([])
+ const [info,setInfo] = useState({})
+ const {od} = useOd();
 
  // console.log("Order value:", order);
 
@@ -34,6 +38,20 @@ const { order } = useOrder();
     fetchOrders()
   })
   //console.log(allorder)
+  useEffect(() => {
+    if (od) {
+      const _id  = od
+      console.log("this is it", od);
+    axios.get(`${serverport}/api/order/getInfo?_id=${_id}`)
+      .then((res)=>{
+      setInfo(res.data)
+      console.log("data",res.data)
+      })
+      //console.log('data',info)
+    }
+  }, [od]);
+
+
   
 
   return (
@@ -44,9 +62,9 @@ const { order } = useOrder();
         allorder.slice().reverse().map((allmeal) =>
           allmeal?.mealName
         ?.toLowerCase()
-        .includes(order.toLowerCase()) &&
+        .includes(orders.toLowerCase()) &&
            (
-          <OrderCard key={allmeal._id} order={allmeal} fetchOrders={fetchOrders}
+          <OrderCard key={allmeal._id} order={allmeal} fetchOrders={fetchOrders} info={info}
           
            />
         ))

@@ -5,7 +5,7 @@ import { useOrder } from '../../context/OrderContext';
 import { serverport } from '../../Static/Variables';
 
 function VendorInfo() {
-const { order } = useOrder(); // <-- Changed here
+const { orders } = useOrder(); // <-- Changed here
   const [allbuss,setAllbuss] = useState([])
   
   const fetchOrders = async()=>{
@@ -38,7 +38,7 @@ const { order } = useOrder(); // <-- Changed here
        allbuss.map((buss) => 
         buss?.businessName
 							?.toLowerCase()
-							.includes(order.toLowerCase()) &&
+							.includes(orders.toLowerCase()) &&
         (
          <VendorCard key={buss._id} buss={buss} 
          
