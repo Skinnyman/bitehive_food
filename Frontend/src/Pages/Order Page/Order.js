@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import OrderCard from '../../Components/OrderCard';
 import axios from 'axios';
 import { serverport } from '../../Static/Variables';
+import { useOrder } from '../../context/OrderContext';
+
 
 function Order() {
   const [allOrders, setAllOrders] = useState([]);
   const [ordersInfo, setOrdersInfo] = useState({});
   const cusId = localStorage.getItem('id');
+  const {orders} = useOrder();
 
   const fetchOrders = async () => {
     try {
@@ -64,7 +67,11 @@ function Order() {
       {allOrders.length === 0 ? (
         <div className='text-center text-gray-500 col-span-2'>No orders available</div>
       ) : (
-        allOrders.slice().reverse().map(order => (
+        allOrders.slice().reverse().map(order =>
+          order?.mealName
+          ?.toLowerCase()
+          .includes(orders.toLowerCase()) &&
+           (
           <OrderCard
             key={order._id}
             order={order}
