@@ -254,6 +254,23 @@ function Order() {
               Order Cancelled
             </div>
           )}
+
+{order.status === "finished" && order.deliveryOption === "delivery" && (
+            <div className="flex flex-col mt-3 text-green-700 font-semibold">
+              <div className="flex items-center">
+                <MdOutlineDone className="mr-2" />
+                Order Completed
+              </div>
+              {order.rating > 0 && (
+                <div className="flex items-center mt-2">
+                  <span className="mr-2">Rating:</span>
+                  {[...Array(order.rating)].map((_, i) => (
+                    <IoStarSharp key={i} className="text-yellow-400 mr-1" />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       ))}
     </div>

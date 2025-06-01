@@ -67,10 +67,10 @@ router.patch("/deliveryinfo", async (req, res) => {
 
 // Getting deliveryInfo
 router.get("/getInfo", async(req,res)=>{
-  const {_id} = req.query;
-  //console.log(_id);
+  const {orderId} = req.query;
+ // console.log(_id);
  try{
-    const info = await delivery.findOne({_id});
+    const info = await delivery.findOne({orderId});
     if (!info) return res.status(404).json({ message: 'Delivery Information not found' });
     res.json(info)
     //console.log(info)

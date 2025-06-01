@@ -1,72 +1,76 @@
 import React, { useEffect, useState } from 'react';
 import OrderCard from '../../Components/OrderCard';
 import axios from 'axios';
-import { useOrder } from '../../context/OrderContext';
 import { serverport } from '../../Static/Variables';
-import { useOd } from '../../context/InfoContext';
-
 
 function Order() {
-const { orders } = useOrder();
-  const [allorder,setAllOrder] = useState([])
- const [info,setInfo] = useState({})
- const {od} = useOd();
-
- // console.log("Order value:", order);
-
-  //const ordersArray = Array.isArray(order) ? order : (order ? [order] : []);
+  const [allOrders, setAllOrders] = useState([]);
+  const [ordersInfo, setOrdersInfo] = useState({});
   const cusId = localStorage.getItem('id');
 
-  const fetchOrders = async()=>{
-    axios.get(`${serverport}/api/order/all?cusId=${cusId}`)
-    .then((res) => {
-      //console.log('API response:', res.data);
-      const data = res.data;
-      // force it into an array if it's a single object
-      if (Array.isArray(data)) {
-        setAllOrder(data);
-      } else {
-        setAllOrder([data]); // wrap object in an array
+  const fetchOrders = async () => {
+    try {
+      if (!cusId) {
+        console.warn('No customer ID found in localStorage.');
+        return;
       }
-    })
-    .catch((err) => {
-      console.log(err);
-      setAllOrder([]); // fallback on error
-    });
-  }
-  useEffect(()=>{
-    fetchOrders()
-  })
-  //console.log(allorder)
-  useEffect(() => {
-    if (od) {
-      const _id  = od
-      console.log("this is it", od);
-    axios.get(`${serverport}/api/order/getInfo?_id=${_id}`)
-      .then((res)=>{
-      setInfo(res.data)
-      console.log("data",res.data)
-      })
-      //console.log('data',info)
+
+      console.log('Customer ID:', cusId);
+
+      const res = await axios.get(`${serverport}/api/order/all?cusId=${cusId}`);
+      const data = res.data;
+
+      console.log('Orders Response:', data);
+
+      // Make sure it's always an array
+      const ordersArray = Array.isArray(data) ? data : (data ? [data] : []);
+      setAllOrders(ordersArray);
+
+      // Fetch delivery info for all orders in parallel
+      const infoPromises = ordersArray.map(order =>
+        axios
+          .get(`${serverport}/api/order/getInfo?orderId=${order._id}`)
+          .then(res => ({
+            orderId: order._id,
+            info: res.data,
+          }))
+          .catch(err => {
+            console.error(`Failed to fetch info for order ${order._id}`, err);
+            return { orderId: order._id, info: {} };
+          })
+      );
+
+      const allInfo = await Promise.all(infoPromises);
+
+      // Transform to object keyed by orderId
+      const infoObj = {};
+      allInfo.forEach(({ orderId, info }) => {
+        infoObj[orderId] = info;
+      });
+
+      setOrdersInfo(infoObj);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      setAllOrders([]);
     }
-  }, [od]);
+  };
 
-
-  
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   return (
     <div className='relative bottom-28 grid grid-cols-1 md:grid-cols-2 gap-10 p-6'>
-      {allorder.length === 0 ? (
-        <div>No orders available</div>
+      {allOrders.length === 0 ? (
+        <div className='text-center text-gray-500 col-span-2'>No orders available</div>
       ) : (
-        allorder.slice().reverse().map((allmeal) =>
-          allmeal?.mealName
-        ?.toLowerCase()
-        .includes(orders.toLowerCase()) &&
-           (
-          <OrderCard key={allmeal._id} order={allmeal} fetchOrders={fetchOrders} info={info}
-          
-           />
+        allOrders.slice().reverse().map(order => (
+          <OrderCard
+            key={order._id}
+            order={order}
+            fetchOrders={fetchOrders}
+            info={ordersInfo[order._id] || {}}
+          />
         ))
       )}
     </div>

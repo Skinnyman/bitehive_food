@@ -52,20 +52,20 @@ function OrderInformation({order,fetchOrders,info}) {
       alert("Failed to get your location. Please allow location access.");
     });
   };
-  //console.log("This is longitude",longitude,"This is the latitide",latitude)
 
-  //console.log("data",orderId)
-  
-    //console.log("Info",info)
+  // const updateStatus = async (id, newStatus) => {
+  //   await axios.patch(`${serverport}/api/order/status/${id}`, {
+  //     status: newStatus,
+  //   });
+  //   fetchOrders(); // refresh data
+  // };
 
-  // useEffect( async()=>{
-  //   try {
-  //     const res = await axios.get(`${serverport}/api/order/getInfo?_id=${orderId}`);
-  //     setInfo(res.data);
-  //   } catch (err) {
-  //     console.error("Failed to fetch order info:", err);
-  //   }
-  // },[])
+  const changeStatus = async()=>{
+    await axios.patch(`${serverport}/api/order/status/${order._id}`, { status: "finished" });
+    setStatus("finished");
+    fetchOrders()
+  }
+
 
   return (
     <motion.div 
@@ -217,13 +217,54 @@ function OrderInformation({order,fetchOrders,info}) {
             </button>
           )}
         </>
+
       )}
       
-      {order.deliveryOption == "delivery" && status === "completed" && (
-          <div className="flex flex-row items-center border px-3 py-2 cursor-pointer hover:shadow-xl hover:bg-green-200">
+      {order.deliveryOption === "delivery" && status === "completed" && (
+          <div className="flex flex-row items-center border px-3 py-2 cursor-pointer hover:shadow-xl hover:bg-green-200"
+          onClick={changeStatus}
+          >
           <MdOutlineDone className="text-green-500 mr-2" size={22} />
           <span>Mark As Order Received</span>
         </div>
+      )}
+      {order.deliveryOption === "delivery" && status === "finished" && (
+        <>
+         <div className="flex flex-row items-center border mt-3 px-3 py-2 hover:bg-green-200">
+         <MdOutlineDone className="text-green-500 mr-2" size={22} />
+         <span>This order has been completed</span>
+         </div>
+         <div className="flex mt-4 items-center border px-3 py-2">
+            <span className="font-semibold mr-4">Rate:</span>
+            {[1, 2, 3, 4, 5].map((num) => (
+              <IoStarSharp
+                key={num}
+                onClick={() => {
+                  setRating(num);
+                  setEditedRating(true);
+                }}
+                className={`mr-2 ${rating >= num ? "text-yellow-400" : "text-gray-300"} cursor-pointer`}
+              />
+            ))}
+          </div>
+          {editedRating && (
+            <button
+              onClick={async () => {
+                await axios.patch(`${serverport}/api/order/rate/${order._id}`, { rating });
+                alert(`You rated ${rating} star(s)`);
+                setEditedRating(false);
+              }}
+              className="flex items-center border mt-2 px-3 py-2 bg-green-100 hover:bg-green-200"
+              >
+              <MdOutlineDone className="text-green-500 mr-2" />
+              Submit Rating
+            </button>
+          )}
+     
+      </>
+       
+        
+
       )}
      
       
