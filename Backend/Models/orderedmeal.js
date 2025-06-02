@@ -22,7 +22,7 @@ deliveryOption:{
 },
 deliveryCharge:{
     type:String,
-    default: 0 
+   
 },
 userId:{
     type:String
@@ -34,6 +34,9 @@ status: {
     type: String,
     enum: ["pending","accepted","cancelled","completed","search","finished"],
     default: "pending"
+},
+accompanimentsName:{
+      type: String,      
 },
 rating: { 
   type: Number,

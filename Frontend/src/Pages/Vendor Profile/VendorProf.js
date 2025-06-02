@@ -5,8 +5,12 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 //import { useOrder } from '../context/OrderContext';
 import { serverport } from '../../Static/Variables';
+import io from "socket.io-client";
+import PickMap from '../../Components/PickMap';
+const socket = io(serverport);
 
 function VendorProf() {
+  const username = localStorage.getItem('username');  
   const [meals, setMeals] = useState([]);
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -14,10 +18,18 @@ function VendorProf() {
   const [quantity, setQuantity] = useState(1);
   const [accompaniments, setAccompaniments] = useState([]);
   const [deliveryOption, setDeliveryOption] = useState("pickup");
-  const [contact, setContact] = useState("");
   const [showMap, setShowMap] = useState(false);
-  const [location, setLocation] = useState("");
-
+const [coords, setCoords] = useState([-1.6221, 6.923]);
+const [formdata, setFormdata] = useState({
+      userId:"",
+      clientName: "",
+      contact_person_phone: "",
+      location: {
+        latitude: '',
+        longitude: '',
+        address: '',
+      },
+    });
   //const { addOrder } = useOrder(); // <-- Changed here
 
   const { userId } = useParams(); // 👈 get vendorId from route
@@ -81,6 +93,7 @@ function VendorProf() {
     : price;
 
   const handleSubmitOrder = async () => {
+    socket.emit("place_order",{message:`New order recieved from ${username}`,vendorId:selectedMeal.userId})
     const orderData = {
       mealName: selectedMeal.name,
       mealId: selectedMeal._id,   
@@ -89,7 +102,7 @@ function VendorProf() {
       totalPrice,
       userId: selectedMeal.userId,
       deliveryOption,
-      accompaniments,
+      accompanimentsName:selectedMeal.accompaniment.name,
       chargeType: selectedMeal.chargeType,
       image: selectedMeal.image,
      
@@ -157,7 +170,7 @@ function VendorProf() {
 
       {showModal && selectedMeal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center px-4" onClick={() => setShowModal(false)}>
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-lg" onClick={(e) => e.stopPropagation()}>
             <div className="flex w-full justify-center items-center mb-2">
               <span className="font-bold text-2xl">Place Order</span>
             </div>
@@ -196,27 +209,45 @@ function VendorProf() {
                 {selectedMeal.description}
               </div>
               <div className="w-full mt-2">
-                {selectedMeal.accompaniments?.map((acc, idx) => (
-                  <div className="flex flex-row w-full mb-1" key={idx}>
-                    <input
-                      type="checkbox"
-                      className="mr-2"
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setAccompaniments([...accompaniments, acc]);
-                          if (!acc.isFree) setPrice((prev) => prev + acc.price);
-                        } else {
-                          setAccompaniments(accompaniments.filter((a) => a !== acc));
-                          if (!acc.isFree) setPrice((prev) => prev - acc.price);
-                        }
-                      }}
-                    />
-                    <label className="block text-gray-500 font-semibold text-sm">
-                      {acc.name} - {acc.isFree ? "Free" : `GHC ${acc.price}`}
-                    </label>
-                  </div>
-                ))}
-              </div>
+                  {(Array.isArray(selectedMeal?.accompaniment)
+                    ? selectedMeal.accompaniment.length > 0
+                    : !!selectedMeal?.accompaniment
+                  ) && (
+                    (Array.isArray(selectedMeal?.accompaniment)
+                      ? selectedMeal.accompaniment
+                      : [selectedMeal.accompaniment]
+                    ).map((acc, idx) => (
+                      acc.price > 0 && (
+                        <div key={idx} className="flex flex-row w-full mb-1">
+                          <input
+                            type="checkbox"
+                            className="mr-2"
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setAccompaniments((prev) => [...prev, acc]);
+                                if (acc.isFree === "No") {
+                                  setPrice((prev) => prev + acc.price);
+                                }
+                              } else {
+                                setAccompaniments((prev) =>
+                                  prev.filter((a) => a.name !== acc.name)
+                                );
+                                if (acc.isFree === "No") {
+                                  setPrice((prev) => prev - acc.price);
+                                }
+                              }
+
+                              //console.log("data", accompaniments);
+                            }}
+                          />
+                          <label className="block text-gray-500 font-semibold text-sm">
+                            {acc.name} - {acc.isFree === "Yes" ? "Free" : `Ghc ${acc.price}`}
+                          </label>
+                        </div>
+                      )
+                    ))
+                  )}
+                    </div>
 
               <div className="w-full mt-4">
                 <label className="text-sm font-semibold block mb-1">Delivery Option</label>
@@ -230,24 +261,55 @@ function VendorProf() {
                 </select>
               </div>
               {deliveryOption === "delivery" && (
-						<>
-							<input
-								id="contact"
-								name={"Your Contact"}
-								value={contact}
-								onChange={(e) => setContact(e.target.value)}
-								type={"tel"}
-                className='my-3 border w-[100%] py-2 rounded-md shadow-md'
-								placeholder={"+233 055......"}
-							/>
-							<div
-								className="my-3 border w-[100%] py-2 rounded-md shadow-md hover:shadow-xl text-center cursor-pointer"
-								onClick={() => setShowMap(true)}
-							>
-								{!location ? "Pick location" : location}
-							</div>
-						</>
-					)}
+                <>
+                  <input
+                    type="text"
+                    placeholder="Enter your name..."
+                    value={formdata.clientName}
+                    onChange={(e) => setFormdata({ ...formdata, clientName: e.target.value })}
+                    className="my-3 border w-full py-2 rounded-md shadow-md"
+                  />
+                  <input
+                    type="tel"
+                    placeholder="+233 055......"
+                    value={formdata.contact_person_phone}
+                    onChange={(e) => setFormdata({ ...formdata, contact_person_phone: e.target.value })}
+                    className="my-3 border w-full py-2 rounded-md shadow-md"
+                  />
+                      {/* Map Picker */}
+                          <PickMap
+                            showMap={showMap}
+                            setShowMap={setShowMap}
+                            setCoords={(coord) => {
+                              setCoords(coord);
+                              setFormdata((prev) => ({
+                                ...prev,
+                                location: {
+                                  ...prev.location,
+                                  longitude: coord[0],
+                                  latitude: coord[1],
+                                },
+                              }));
+                            }}
+                            setLocationAddr={(addr) => {
+                              setFormdata((prev) => ({
+                                ...prev,
+                                location: {
+                                  ...prev.location,
+                                  address: addr,
+                                },
+                              }));
+                            }}
+                          />
+                  <div
+                    className="my-3 border w-full py-2 rounded-md shadow-md hover:shadow-xl text-center cursor-pointer"
+                    onClick={() => setShowMap(true)}
+                  >
+                    {!formdata.location.address ? "Pick location" :  formdata.location.address}
+                  </div>
+                </>
+              )}
+
 
               <div className="w-full flex flex-row justify-between items-center mt-4">
                 <div>

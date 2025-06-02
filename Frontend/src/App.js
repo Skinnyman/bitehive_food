@@ -9,7 +9,7 @@ import VendorForm from './Pages/Vendor Form/VendorForm';
 import VendorProf from './Pages/Vendor Profile/VendorProf';
 import "mapbox-gl/dist/mapbox-gl.css";
 import Favorite from './Pages/Favorite Page/Favorite';
-
+import { ToastContainer } from 'react-toastify';
 
 //  Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -26,6 +26,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+       
         <Route path="/" element={<Landing darkmode={darkmode} toggle={toggle} />} />
         <Route path="login" element={<Login darkmode={darkmode} toggle={toggle} />} />
         <Route path="register" element={<Register darkmode={darkmode} toggle={toggle} />} />
@@ -85,7 +86,7 @@ function App() {
                   }
                 />
       </Routes>
-      
+      <ToastContainer />
     </BrowserRouter>
   );
 }

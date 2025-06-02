@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaHeart, FaStar } from "react-icons/fa6";
+import { FaHeart, FaStar,FaComments } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from 'axios';
@@ -108,6 +108,10 @@ function VendorCard({ buss }) {
             <FaStar />
             <span>{ratings.averageRating || 0} Stars</span>
           </div>
+          <button className='items-center flex gap-2 border border-blue-400 p-2 hover:bg-blue-400 rounded '>
+             <FaComments/>
+            <span>Chat</span>
+          </button>
         </div>
     </motion.div>
   );

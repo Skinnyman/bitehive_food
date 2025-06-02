@@ -5,10 +5,18 @@ const delivery = require("../Models/delivery_info");
 const router = express.Router();
 // Storing all orders in the database
 router.post("/ordered",async(req,res) =>{
- const{mealName,mealId, price,quantity,deliveryOption,totalPrice,userId,cusId,deliveryCharge}= req.body;
- const ordered = await orderedMeal.create({mealName,mealId, price,quantity,deliveryOption,totalPrice,userId,cusId,deliveryCharge});
+ const{mealName,mealId, price,quantity,deliveryOption,totalPrice,userId,cusId,deliveryCharge,accompanimentsName}= req.body;
+//  let parsedAccompaniment;
+//  try {
+//    parsedAccompaniment = JSON.parse(accompaniments);
+//  } catch (error) {
+//    parsedAccompaniment = []; // fallback
+//    //console.log(parsedAccompaniment)
+//  }
+ const ordered = await orderedMeal.create({mealName,mealId, price,quantity,deliveryOption,totalPrice,userId,cusId,deliveryCharge,accompanimentsName});
     res.status(201).json(ordered);    
 
+    console.log(req.body)
 })
 
 // Adding deliveryfee

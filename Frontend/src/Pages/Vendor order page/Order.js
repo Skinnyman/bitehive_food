@@ -5,6 +5,7 @@ import axios from "axios";
 import { serverport } from "../../Static/Variables";
 import PickMap from "../../Components/PickMap";
 
+
 function Order() {
   const [allorder, setAllOrder] = useState([]);
   const [showMap, setShowMap] = useState(false);
@@ -19,7 +20,7 @@ function Order() {
     try {
       const res = await axios.get(`${serverport}/api/order/getorder?userId=${userId}`);
       const orders = Array.isArray(res.data) ? res.data : [res.data];
-
+   
       // Fetch locations for each order
       const locationsPromises = orders.map(async (order) => {
         const locRes = await axios.get(`${serverport}/api/order/location?orderId=${order._id}`);
@@ -83,7 +84,7 @@ function Order() {
       console.error("Error submitting delivery data:", err);
     }
   };
-  
+console.log("data:",allorder)
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-14">
@@ -97,10 +98,16 @@ function Order() {
 
           <div className="flex flex-col items-center">
             <PropValue property="Meal Name:" value={order.mealName} />
+            {order?.accompanimentsName?.length > 0 && (
+                  <PropValue property="Accompainment:" value={order.accompanimentsName} />
+              )}
             <PropValue property="Price:" value={`GHC ${order.price}`} />
             <PropValue property="Quantity:" value={order.quantity || 1} />
             <PropValue property="Type:" value={order.deliveryOption} />
-            <PropValue property="Delivery Fee:" value={order.deliveryCharge} />
+            {order.deliveryCharge?.length > 0 && (
+                <PropValue property="Delivery Fee:" value={order.deliveryCharge} />
+            )}
+           
             <PropValue property="Status:" value={order.status} />
             <PropValue property="Total Price:" value={`GHC ${order.totalPrice}`} />
           </div>

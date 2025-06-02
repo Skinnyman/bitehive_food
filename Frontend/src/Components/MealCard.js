@@ -3,7 +3,7 @@ import { FaStar } from "react-icons/fa";
 import { FaCartShopping } from "react-icons/fa6";
 import axios from 'axios';
 import { useOrder } from '../context/OrderContext';
-import { useOd } from '../context/InfoContext';
+//import { useOd } from '../context/InfoContext';
 import { motion } from "framer-motion";
 import { serverport } from '../Static/Variables';
 import io from "socket.io-client";
@@ -12,15 +12,8 @@ const socket = io(serverport);
 
 
 function MealCard() {
-  // useEffect(() => {
-  //   socket.on("receive_message", (data) => {
-  //     alert("message received",data.message)
-  //   });
+  const username = localStorage.getItem('username'); 
   
-  //   return () => {
-  //     socket.off("receive_message");
-  //   };
-  // }, [socket]);
   const [meals, setMeals] = useState([]);  
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -28,9 +21,7 @@ function MealCard() {
   const [quantity, setQuantity] = useState(1);
   const [accompaniments, setAccompaniments] = useState([]);
   const [deliveryOption, setDeliveryOption] = useState("pickup");
-  const [contact, setContact] = useState("");
   const [showMap, setShowMap] = useState(false);
-  const [location, setLocation] = useState("");
   const [coords, setCoords] = useState([-1.6221, 6.923]);
   const [formdata, setFormdata] = useState({
     userId:"",
@@ -43,8 +34,8 @@ function MealCard() {
     },
   });
 
-  const { orders,setOrder } = useOrder(); // <-- Changed here
-  const {od,setOd} = useOd();
+  const { orders } = useOrder(); // <-- Changed here
+ // const {od,setOd} = useOd();
   //console.log(order)
   const userId = localStorage.getItem('id');
 
@@ -107,7 +98,7 @@ function MealCard() {
     : price;
 
   const handleSubmitOrder = async () => {
-    socket.emit("place_order",{message:"New order recieved",vendorId:selectedMeal.userId})
+    socket.emit("place_order",{message:`New order recieved from ${username}`,vendorId:selectedMeal.userId})
     const orderData = {
       mealName: selectedMeal.name,
       mealId: selectedMeal._id,   
@@ -116,7 +107,7 @@ function MealCard() {
       totalPrice,
       userId: selectedMeal.userId,
       deliveryOption,
-      accompaniments,
+      accompanimentsName:selectedMeal.accompaniment.name,
       chargeType: selectedMeal.chargeType,
       image: selectedMeal.image,
       cusId:userId,
@@ -127,6 +118,7 @@ function MealCard() {
     //console.log("Order submitted:", orderData);
     try {
      const response =  await axios.post(`${serverport}/api/order/ordered`, orderData);
+     console.log(response.data)
      const newOrderId = response.data._id;
      const updatedFormData = {
       ...formdata,
@@ -135,7 +127,7 @@ function MealCard() {
  
       const info = await axios.post(`${serverport}/api/order/deliveryInfo`,updatedFormData);
       const deliveryInfoId = info.data._id;
-       setOd(deliveryInfoId);
+       //setOd(deliveryInfoId);
     
     } catch (err) {
       console.log(err);

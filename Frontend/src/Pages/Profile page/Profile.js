@@ -2,28 +2,14 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { serverport } from '../../Static/Variables';
 import PickMap from '../../Components/PickMap';
-import io from "socket.io-client";
 
-const socket = io(serverport);
+
+
 
 function Profile() {
   const userId = localStorage.getItem('id');
  
-    useEffect(() => {
-      const vendorId = localStorage.getItem("id"); 
-      if (vendorId) {
-        socket.emit("registerVendor", vendorId);
-      }
-      socket.on('newOrder', (data) => {
-        alert(data.message);
-        // Optionally update state to show the order in UI
-      });
   
-      return () => {
-        socket.off('newOrder');
-      };
-    
-    }, [socket]);
 
   const [formData, setFormData] = useState({
     userId: userId,

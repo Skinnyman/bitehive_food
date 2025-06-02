@@ -5,6 +5,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { serverport } from "../Static/Variables";
 import PickMap from "./PickMap";
+import { toast } from 'react-toastify';
 import { FaBusSimple } from "react-icons/fa6";
 
 
@@ -53,12 +54,7 @@ function OrderInformation({order,fetchOrders,info}) {
     });
   };
 
-  // const updateStatus = async (id, newStatus) => {
-  //   await axios.patch(`${serverport}/api/order/status/${id}`, {
-  //     status: newStatus,
-  //   });
-  //   fetchOrders(); // refresh data
-  // };
+
 
   const changeStatus = async()=>{
     await axios.patch(`${serverport}/api/order/status/${order._id}`, { status: "finished" });
@@ -86,7 +82,10 @@ function OrderInformation({order,fetchOrders,info}) {
       <PropValue property="Price:" value={`GHC ${order.price}`} />
       <PropValue property="Quantity:" value={order.quantity || 1} />
       <PropValue property="Type:" value={order.deliveryOption} />
-      <PropValue property="Delivery Fee:" value={order.deliveryCharge} />
+      {order.deliveryCharge?.length > 0 && (
+              <PropValue property="Delivery Fee:" value={order.deliveryCharge} />
+      )}
+ 
       <PropValue property="Status:" value={status} />
       <PropValue property="Total Price:" value={`GHC ${order.totalPrice}`} />
       
@@ -169,7 +168,7 @@ function OrderInformation({order,fetchOrders,info}) {
             <button
               onClick={async () => {
                 await axios.patch(`${serverport}/api/order/rate/${order._id}`, { rating });
-                alert(`You rated ${rating} star(s)`);
+                toast.info(`You rated ${rating} star(s)`);
                 setEditedRating(false);
               }}
               className="flex items-center border mt-2 px-3 py-2 bg-green-100 hover:bg-green-200"
@@ -188,34 +187,8 @@ function OrderInformation({order,fetchOrders,info}) {
           </div>
 
 
-          {/* Rating Section */}
-          <div className="flex mt-4 items-center border px-3 py-2">
-            <span className="font-semibold mr-4">Rate:</span>
-            {[1, 2, 3, 4, 5].map((num) => (
-              <IoStarSharp
-                key={num}
-                onClick={() => {
-                  setRating(num);
-                  setEditedRating(true);
-                }}
-                className={`mr-2 ${rating >= num ? "text-yellow-400" : "text-gray-300"} cursor-pointer`}
-              />
-            ))}
-          </div>
 
-          {editedRating && (
-            <button
-              onClick={async () => {
-                await axios.patch(`${serverport}/api/order/rate/${order._id}`, { rating });
-                alert(`You rated ${rating} star(s)`);
-                setEditedRating(false);
-              }}
-              className="flex items-center border mt-2 px-3 py-2 bg-green-100 hover:bg-green-200"
-            >
-              <MdOutlineDone className="text-green-500 mr-2" />
-              Submit Rating
-            </button>
-          )}
+        
         </>
 
       )}
@@ -251,7 +224,7 @@ function OrderInformation({order,fetchOrders,info}) {
             <button
               onClick={async () => {
                 await axios.patch(`${serverport}/api/order/rate/${order._id}`, { rating });
-                alert(`You rated ${rating} star(s)`);
+                toast.info(`You rated ${rating} star(s)`);
                 setEditedRating(false);
               }}
               className="flex items-center border mt-2 px-3 py-2 bg-green-100 hover:bg-green-200"
