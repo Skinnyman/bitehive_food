@@ -98,7 +98,7 @@ function MealCard() {
     : price;
 
   const handleSubmitOrder = async () => {
-    socket.emit("place_order",{message:`New order recieved from ${username}`,vendorId:selectedMeal.userId})
+    socket.emit("place_order",{message:`New order from ${username}`,vendorId:selectedMeal.userId})
     const orderData = {
       mealName: selectedMeal.name,
       mealId: selectedMeal._id,   
@@ -135,7 +135,8 @@ function MealCard() {
     setShowModal(false);
     
   };
- 
+console.log(accompaniments)
+
 
   return (
     <motion.div 
@@ -228,6 +229,7 @@ function MealCard() {
               <div className="w-full mt-2 font-bold break-words whitespace-normal">
                 {selectedMeal.description}
               </div>
+              
                   <div className="w-full mt-2">
                   {(Array.isArray(selectedMeal?.accompaniment)
                     ? selectedMeal.accompaniment.length > 0
@@ -237,7 +239,7 @@ function MealCard() {
                       ? selectedMeal.accompaniment
                       : [selectedMeal.accompaniment]
                     ).map((acc, idx) => (
-                      acc.price > 0 && (
+                      acc.price >= 0 && acc.price != null && (
                         <div key={idx} className="flex flex-row w-full mb-1">
                           <input
                             type="checkbox"

@@ -13,6 +13,7 @@ function Order() {
   const [selectedOrderLocation, setSelectedOrderLocation] = useState(null); // holds lat/long for selected order
   const [formdata, setFormdata] = useState({});
   const [fee, setfee] = useState({});
+
   const userId = localStorage.getItem("id");
 
   // Fetch all orders
@@ -20,27 +21,45 @@ function Order() {
     try {
       const res = await axios.get(`${serverport}/api/order/getorder?userId=${userId}`);
       const orders = Array.isArray(res.data) ? res.data : [res.data];
-   
-      // Fetch locations for each order
-      const locationsPromises = orders.map(async (order) => {
-        const locRes = await axios.get(`${serverport}/api/order/location?orderId=${order._id}`);
+  
+      // Fetch both location and deliveryInfo for each order
+      const combinedPromises = orders.map(async (order) => {
+        let location = {};
+        let deliveryInfo = {};
+  
+        try {
+          const locRes = await axios.get(`${serverport}/api/order/location?orderId=${order._id}`);
+          location = locRes.data[0]?.location || {};
+        } catch (err) {
+          console.error(`Failed to fetch location for order ${order._id}:`, err);
+        }
+  
+        try {
+          const deliveryRes = await axios.get(`${serverport}/api/order/deliveryinfo?orderId=${order._id}`);
+          deliveryInfo = deliveryRes.data || {};
+        } catch (err) {
+          console.error(`Failed to fetch delivery info for order ${order._id}:`, err);
+        }
+  
         return {
           ...order,
-          location: locRes.data[0]?.location || {},
+          location,
+          deliveryInfo,
         };
       });
-
-      const ordersWithLocations = await Promise.all(locationsPromises);
-      setAllOrder(ordersWithLocations);
+  
+      const enrichedOrders = await Promise.all(combinedPromises);
+      setAllOrder(enrichedOrders);
     } catch (err) {
-      console.error("Failed to fetch orders or locations:", err);
+      console.error("Failed to fetch orders:", err);
       setAllOrder([]);
     }
   };
+  
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  });
 
   const updateStatus = async (id, newStatus) => {
     await axios.patch(`${serverport}/api/order/status/${id}`, {
@@ -84,7 +103,7 @@ function Order() {
       console.error("Error submitting delivery data:", err);
     }
   };
-console.log("data:",allorder)
+//console.log("data:",allorder)
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-14">
@@ -107,7 +126,9 @@ console.log("data:",allorder)
             {order.deliveryCharge?.length > 0 && (
                 <PropValue property="Delivery Fee:" value={order.deliveryCharge} />
             )}
-           
+                      {order.deliveryInfo?.contact_person_phone && (
+              <PropValue property="Client Number:" value={order.deliveryInfo.contact_person_phone} />
+            )}
             <PropValue property="Status:" value={order.status} />
             <PropValue property="Total Price:" value={`GHC ${order.totalPrice}`} />
           </div>

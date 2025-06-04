@@ -18,12 +18,12 @@ function Order() {
         return;
       }
 
-      console.log('Customer ID:', cusId);
+      //console.log('Customer ID:', cusId);
 
       const res = await axios.get(`${serverport}/api/order/all?cusId=${cusId}`);
       const data = res.data;
 
-      console.log('Orders Response:', data);
+     // console.log('Orders Response:', data);
 
       // Make sure it's always an array
       const ordersArray = Array.isArray(data) ? data : (data ? [data] : []);

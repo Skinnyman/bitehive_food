@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from 'axios';
 import { serverport } from '../Static/Variables';
+import Chat from './Chat';
 
 // Reusable property display
 function PropValue({ property, value }) {
@@ -19,6 +20,7 @@ function VendorCard({ buss }) {
   const [isFav, setIsFav] = useState(false);
   const vendorId = buss.userId
   const customerId = localStorage.getItem('id');
+ const [showchat,setShowChat] = useState(false);
   const [ratings, setRatings] = useState({
       averageRating: 0
     });
@@ -59,6 +61,9 @@ function VendorCard({ buss }) {
       console.error(err);
     }
   };
+  const handleChat = (userId)=>{
+    setShowChat(true)
+}
   
 
   return (
@@ -84,8 +89,8 @@ function VendorCard({ buss }) {
 
         {/* Description */}
         <div className="text-sm mt-2 text-gray-600">
-          <div className="font-semibold text-gray-500">Description:</div>
-          <p className="mt-1">{buss.description}</p>
+          <div className="font-bold text-gray-500">Description:</div>
+          <p className="mt-1 font-bold">{buss.description}</p>
         </div>
 
      
@@ -108,10 +113,17 @@ function VendorCard({ buss }) {
             <FaStar />
             <span>{ratings.averageRating || 0} Stars</span>
           </div>
-          <button className='items-center flex gap-2 border border-blue-400 p-2 hover:bg-blue-400 rounded '>
+          <button onClick={handleChat} className='items-center flex gap-2 border border-blue-400 p-2 hover:bg-blue-400 rounded '>
              <FaComments/>
             <span>Chat</span>
           </button>
+          {showchat && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center px-4" onClick={() => setShowChat(false)}>
+              <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-lg" onClick={(e) => e.stopPropagation()}>
+                  <Chat/>
+              </div>
+            </div>
+          )}
         </div>
     </motion.div>
   );

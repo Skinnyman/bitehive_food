@@ -24,7 +24,7 @@ router.post('/addmeal', upload.single('image'), async (req, res) => {
     }
     const meal = await Meal.create({userId,name,image,mealType,price,chargeType,description,accompaniment: parsedAccompaniment});
     res.status(201).json(meal);  
-    console.log(meal)
+    //console.log(meal)
   });
 
  // showing product at the product listing according to the vendor 

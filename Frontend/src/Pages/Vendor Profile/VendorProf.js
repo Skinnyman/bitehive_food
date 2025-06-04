@@ -50,7 +50,7 @@ const [formdata, setFormdata] = useState({
   }, [userId]);
   
 
-
+// handling clicks of meals
   const handleOrderClick = (meal) => {
     setSelectedMeal(meal);
     setShowModal(true);
@@ -68,6 +68,8 @@ const [formdata, setFormdata] = useState({
     setAccompaniments([]);
     setDeliveryOption("pickup");
   };
+
+  //handling chat functionality
 
   const calculatePrice = (num) => {
     const number = parseInt(num);
@@ -93,7 +95,7 @@ const [formdata, setFormdata] = useState({
     : price;
 
   const handleSubmitOrder = async () => {
-    socket.emit("place_order",{message:`New order recieved from ${username}`,vendorId:selectedMeal.userId})
+    socket.emit("place_order",{message:`New order from ${username}`,vendorId:selectedMeal.userId})
     const orderData = {
       mealName: selectedMeal.name,
       mealId: selectedMeal._id,   

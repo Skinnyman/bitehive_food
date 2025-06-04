@@ -13,7 +13,7 @@ const VendorForm = () => {
     userId: user,
     businessName: '',
     contactPerson: '',
-    phone: '+233',
+    phone: '',
     email: '',
     description: '',
     delivery: '',

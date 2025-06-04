@@ -87,6 +87,20 @@ router.get("/getInfo", async(req,res)=>{
   res.json ({error:"Failed to get Info"})
  }
 })
+// backend: routes/order.js (or similar)
+router.get("/deliveryinfo", async (req, res) => {
+  const { orderId } = req.query;
+
+  try {
+    const info = await delivery.findOne({ orderId });
+    if (!info) {
+      return res.status(404).json({ message: 'Delivery Information not found' });
+    }
+    res.json(info); // info includes contact_person_phone
+  } catch (err) {
+    res.status(500).json({ error: "Failed to get delivery info" });
+  }
+});
 
 //Getting the location
 router.get('/location', async (req,res)=> {

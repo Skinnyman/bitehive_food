@@ -46,7 +46,7 @@ const Product = () => {
     description: '',
     accompaniment: {
       name: '',
-      price: 0,
+      price: "",
       isFree: '',
     },
   });
@@ -70,6 +70,7 @@ const Product = () => {
   };
 
   const handleSubmit = async (e) => {
+    
     e.preventDefault();
     const formData = new FormData();
     formData.append('userId', product.userId);
@@ -85,6 +86,21 @@ const Product = () => {
       const response = await axios.post(`${serverport}/api/meal/addmeal`, formData);
       console.log("Success:", response.data.message || "meal listing completed");
       fetchMeal(); // refresh products after add
+      setProduct({
+  userId: user,
+  name: '',
+  mealType: '',
+  image: null,
+  price: 0,
+  chargeType: '',
+  description: '',
+  accompaniment: {
+    name: '',
+    price: 0,
+    isFree: '',
+  },
+});
+
     } catch (err) {
       console.log(err);
     }
@@ -143,7 +159,15 @@ const Product = () => {
               </div>
               <div>
                 <label className="block font-medium mb-1">Product Description</label>
-                <textarea name="description" onChange={handleChange} placeholder="Enter your product description" className="input" />
+                {/* <textarea name="description"  onChange={handleChange} placeholder="Enter your product description" className="input" /> */}
+                                    <textarea
+                        className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        rows="4"
+                        placeholder="Enter your product description"
+                        name="description"
+                        value={product.description}
+                        onChange={handleChange}
+                      />
               </div>
             </div>
 
