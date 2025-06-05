@@ -36,10 +36,10 @@ const handleLogout = () => {
 
   return (
     <header
-      className={`fixed bg-gray-100 top-0 left-0 right-0 z-50 ${
-        darkmode ? 'bg-[black] text-white' : ''
-      } shadow-md border-2`}
-    >
+    className={`fixed top-0 left-0 right-0 z-50 shadow-md border-b-2 ${
+      darkmode ? 'bg-black text-white' : 'bg-gray-100 text-gray-900'
+    }`}
+  >
       <div className="container mx-auto px-4 py-3">
         <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-4">
           {/* Logo */}
@@ -105,12 +105,12 @@ const handleLogout = () => {
               >
               Sign Up
             </Link>
-            <Link
+            {/* <Link
               to="/register"
               className="px-3 py-1 text-sm font-semibold border-2 border-yellow-500 rounded-md hover:bg-yellow-400 hover:text-white transition"
               >
               Become a vendor
-            </Link>
+            </Link> */}
             </div>
            
 

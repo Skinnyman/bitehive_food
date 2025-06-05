@@ -11,7 +11,7 @@ import PickMap from './PickMap';
 const socket = io(serverport);
 
 
-function MealCard() {
+function MealCard({toggle,darkmode}) {
   const username = localStorage.getItem('username'); 
   
   const [meals, setMeals] = useState([]);  
@@ -19,7 +19,7 @@ function MealCard() {
   const [showModal, setShowModal] = useState(false);
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [accompaniments, setAccompaniments] = useState([]);
+  const [ accompanimentsName, setAccompaniments] = useState([]);
   const [deliveryOption, setDeliveryOption] = useState("pickup");
   const [showMap, setShowMap] = useState(false);
   const [coords, setCoords] = useState([-1.6221, 6.923]);
@@ -107,7 +107,7 @@ function MealCard() {
       totalPrice,
       userId: selectedMeal.userId,
       deliveryOption,
-      accompanimentsName:selectedMeal.accompaniment.name,
+      accompanimentsName,
       chargeType: selectedMeal.chargeType,
       image: selectedMeal.image,
       cusId:userId,
@@ -118,7 +118,7 @@ function MealCard() {
     //console.log("Order submitted:", orderData);
     try {
      const response =  await axios.post(`${serverport}/api/order/ordered`, orderData);
-     console.log(response.data)
+     //console.log(response.data)
      const newOrderId = response.data._id;
      const updatedFormData = {
       ...formdata,
@@ -135,12 +135,12 @@ function MealCard() {
     setShowModal(false);
     
   };
-console.log(accompaniments)
+console.log(accompanimentsName)
 
 
   return (
     <motion.div 
-    className="grid grid-cols-1 md:grid-cols-2 gap-10 p-6"
+    className={`grid grid-cols-1 md:grid-cols-2 gap-10 p-6 `}
     initial={{ opacity: 0, y: 40 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{duration:0.5}}
@@ -151,7 +151,7 @@ console.log(accompaniments)
 							?.toLowerCase()
 							.includes(orders.toLowerCase()) &&
          (
-        <div key={meal._id} className="border w-[350px] h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center bg-white">
+        <div key={meal._id} className={`${darkmode ? 'bg-gray-950 text-white h-16' : ''}border w-[350px] h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center bg-white relative right-10`}>
           <div className="w-2/5 flex justify-center items-center">
             <div className="h-36 w-36 bg-slate-400 rounded-xl overflow-hidden">
               <img
@@ -164,7 +164,7 @@ console.log(accompaniments)
           <div className="w-3/5 flex flex-col justify-between p-2">
             <div>
               <div className="font-bold text-lg mb-1">{meal.name}</div>
-              <div className="text-sm text-gray-600 break-words whitespace-normal">{meal.description}</div>
+              <div className={`text-sm text-gray-600 break-words whitespace-normal ${darkmode ? ' text-white h-16' : ''}`}>{meal.description}</div>
             </div>
             <div className="flex flex-row justify-between items-center mt-2">
               <div className="text-xl font-bold">₵ {meal.price}</div>

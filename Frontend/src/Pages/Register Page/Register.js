@@ -24,9 +24,26 @@ function Register({darkmode,toggle}) {
         const response = await axios.post(`${serverport}/api/auth/register`, formData);
        // navigate("/login");
         console.log("Message:", response.data.msg)
-        if (response.data.msg === "User registered successfully"){
-          navigate("/login")
+        if (response.data.msg === "User registered successfully") {
+          const user = response.data.user;
+        
+          if (user) {
+            localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("token", response.data.token || "dummy-token"); 
+            localStorage.setItem("username", user.username);
+            localStorage.setItem("has", user.hasShop);
+            localStorage.setItem("id", user.id);
+        
+            if (user.role === "customer") {
+              navigate("/client");
+            } else if (user.hasShop === true) {
+              navigate('/vendor');
+            } else {
+              navigate("/vendorform");
+            }
+          }
         }
+        
 
    } catch(err) {
        const errorMsg = err.response.data.msg || "Something went wrong";
@@ -39,7 +56,7 @@ function Register({darkmode,toggle}) {
     
         <div>
             <Navbar darkmode={darkmode} toggle={toggle}/>
-    <div  className={` ${darkmode ? 'bg-gray-800  text-white':' '}container mx-auto flex flex-col md:flex-row items-center justify-center min-h-screen relative top-36 px-4 py-10 `}>
+    <div  className={` ${darkmode ? 'bg-gray-950  text-white':' '}container mx-auto flex flex-col md:flex-row items-center justify-center min-h-[138vh]  relative  px-4 py-10 top-20 `}>
             {/* Left side */}
            <div className="hidden md:block w-full max-w-sm h-[611px] flex-1">
                     <img

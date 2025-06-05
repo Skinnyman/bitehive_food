@@ -33,7 +33,7 @@ function Client({ toggle, darkmode }) {
       case 'Meals':
         return (
           <div className="text-xl font-semibold p-4 text-black dark:text-white">
-           <Meal/>
+           <Meal  darkmode={darkmode} toggle={toggle}/>
           </div>
         );
       case 'Vendor':
@@ -62,7 +62,7 @@ function Client({ toggle, darkmode }) {
   };
 
   return (
-    <div className={`${darkmode ? 'dark' : ''}`}>
+    <div className={`${darkmode ? 'bg-gray-950 text-white h-16' : ''} `}>
       <div className="min-h-screen bg-white text-black dark:bg-black dark:text-white relative">
         {/* Hamburger Icon */}
         <div className="md:hidden fixed top-4 left-1 z-50">
@@ -128,7 +128,7 @@ function Client({ toggle, darkmode }) {
           </aside>
 
           {/* Main Content */}
-          <main className="ml-0 md:ml-60 w-full px-4 pt-24 relative top-24">
+          <main className={`${darkmode ? 'bg-white text-white h-full' : ''}ml-0 md:ml-60 w-full px-4 pt-24 relative top-24  min-h-[128vh]`}>
             {renderContent()}
           
           </main>

@@ -1,9 +1,9 @@
 import React from 'react';
 import MealCard from "../../Components/MealCard"
-function Meal() {
+function Meal({toggle, darkmode}) {
   return (
     <div className='relative bottom-32'>
-    <MealCard />
+    <MealCard toggle={toggle} darkmode={darkmode} />
   </div>
   
   

@@ -219,7 +219,7 @@ const [formdata, setFormdata] = useState({
                       ? selectedMeal.accompaniment
                       : [selectedMeal.accompaniment]
                     ).map((acc, idx) => (
-                      acc.price > 0 && (
+                      acc.price >= 0 &&acc.price !== null && (
                         <div key={idx} className="flex flex-row w-full mb-1">
                           <input
                             type="checkbox"

@@ -5,49 +5,41 @@ import axios from "axios";
 import { serverport } from "../../Static/Variables";
 import PickMap from "../../Components/PickMap";
 
-
 function Order() {
   const [allorder, setAllOrder] = useState([]);
   const [showMap, setShowMap] = useState(false);
   const [routeCoords, setRouteCoords] = useState(null);
-  const [selectedOrderLocation, setSelectedOrderLocation] = useState(null); // holds lat/long for selected order
+  const [selectedOrderLocation, setSelectedOrderLocation] = useState(null);
   const [formdata, setFormdata] = useState({});
   const [fee, setfee] = useState({});
 
   const userId = localStorage.getItem("id");
 
-  // Fetch all orders
   const fetchOrders = async () => {
     try {
       const res = await axios.get(`${serverport}/api/order/getorder?userId=${userId}`);
       const orders = Array.isArray(res.data) ? res.data : [res.data];
-  
-      // Fetch both location and deliveryInfo for each order
       const combinedPromises = orders.map(async (order) => {
         let location = {};
         let deliveryInfo = {};
-  
         try {
           const locRes = await axios.get(`${serverport}/api/order/location?orderId=${order._id}`);
           location = locRes.data[0]?.location || {};
         } catch (err) {
           console.error(`Failed to fetch location for order ${order._id}:`, err);
         }
-  
         try {
           const deliveryRes = await axios.get(`${serverport}/api/order/deliveryinfo?orderId=${order._id}`);
           deliveryInfo = deliveryRes.data || {};
         } catch (err) {
           console.error(`Failed to fetch delivery info for order ${order._id}:`, err);
         }
-  
         return {
           ...order,
           location,
           deliveryInfo,
         };
       });
-  
       const enrichedOrders = await Promise.all(combinedPromises);
       setAllOrder(enrichedOrders);
     } catch (err) {
@@ -55,17 +47,16 @@ function Order() {
       setAllOrder([]);
     }
   };
-  
 
   useEffect(() => {
     fetchOrders();
-  });
+  }, []);
 
   const updateStatus = async (id, newStatus) => {
     await axios.patch(`${serverport}/api/order/status/${id}`, {
       status: newStatus,
     });
-    fetchOrders(); // refresh data
+    fetchOrders();
   };
 
   const handleShowMap = (order) => {
@@ -97,109 +88,113 @@ function Order() {
       if (fee[orderId]) {
         await axios.patch(`${serverport}/api/order/deliveryfee`, fee[orderId]);
       }
-      // Refresh orders to get updated delivery info and show the message persistently
       fetchOrders();
     } catch (err) {
       console.error("Error submitting delivery data:", err);
     }
   };
-//console.log("data:",allorder)
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-14">
-      {allorder?.length === 0 && <div>No orders available</div>}
-      {allorder.slice().reverse().map((order) => (
-        <div
-          key={order._id}
-          className="flex flex-col h-fit w-[400px] border p-2 mr-2 mb-5 shadow-md hover:shadow-xl bg-blue-100"
-        >
-          <h1 className="text-lg font-bold ml-2">Order Information</h1>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-2 md:px-8">
+      {allorder?.length === 0 && <div className="text-center mt-10 text-gray-500">No orders available</div>}
+      {allorder
+        .slice()
+        .reverse()
+        .map((order) => (
+          <div
+            key={order._id}
+            className="flex flex-col h-fit w-full max-w-md md:w-[400px] border p-4 mx-auto md:mx-0 mb-6 shadow-md hover:shadow-xl bg-blue-100 rounded-lg"
+          >
+            <h1 className="text-lg font-bold mb-3 ml-1">Order Information</h1>
 
-          <div className="flex flex-col items-center">
-            <PropValue property="Meal Name:" value={order.mealName} />
-            {order?.accompanimentsName?.length > 0 && (
-                  <PropValue property="Accompainment:" value={order.accompanimentsName} />
+            <div className="flex flex-col items-center">
+              <PropValue property="Meal Name:" value={order.mealName} />
+              {order?.accompanimentsName?.name && (
+                <PropValue property="Accompainment:" value={order.accompanimentsName.name} />
               )}
-            <PropValue property="Price:" value={`GHC ${order.price}`} />
-            <PropValue property="Quantity:" value={order.quantity || 1} />
-            <PropValue property="Type:" value={order.deliveryOption} />
-            {order.deliveryCharge?.length > 0 && (
-                <PropValue property="Delivery Fee:" value={order.deliveryCharge} />
-            )}
-                      {order.deliveryInfo?.contact_person_phone && (
-              <PropValue property="Client Number:" value={order.deliveryInfo.contact_person_phone} />
-            )}
-            <PropValue property="Status:" value={order.status} />
-            <PropValue property="Total Price:" value={`GHC ${order.totalPrice}`} />
-          </div>
-
-          {order.status === "pending" && (
-            <div className="flex mt-3 gap-3">
-              <button
-                onClick={() => updateStatus(order._id, "accepted")}
-                className="flex items-center border px-3 py-2 bg-green-100 hover:bg-green-200"
-              >
-                <MdOutlineDone className="text-green-500 mr-2" /> Accept Order
-              </button>
-              <button
-                onClick={() => updateStatus(order._id, "cancelled")}
-                className="flex items-center border px-3 py-2 hover:bg-red-200"
-              >
-                <MdCancel className="text-red-500 mr-2" /> Cancel Order
-              </button>
+              <PropValue property="Price:" value={`GHC ${order.price}`} />
+              <PropValue property="Quantity:" value={order.quantity || 1} />
+              <PropValue property="Type:" value={order.deliveryOption} />
+              {order.deliveryCharge?.length > 0 && <PropValue property="Delivery Fee:" value={order.deliveryCharge} />}
+              {order.deliveryInfo?.clientName && order.deliveryOption === "delivery" && (
+                <PropValue property="Client Name:" value={order.deliveryInfo.clientName} />
+              )}
+              {order.deliveryInfo?.contact_person_phone && order.deliveryOption === "delivery" && (
+                <PropValue property="Client Number:" value={order.deliveryInfo.contact_person_phone} />
+              )}
+              <PropValue property="Status:" value={order.status} />
+              <PropValue property="Total Price:" value={`GHC ${order.totalPrice}`} />
             </div>
-          )}
 
-          {order.status === "accepted" && order.deliveryOption === "pickup" && (
-            <div className="flex mt-3">
-              <button
-                onClick={async () => updateStatus(order._id, "completed")}
-                className="flex items-center border px-3 py-2 bg-green-200 hover:bg-green-300"
-              >
-                <MdOutlineDone className="text-green-600 mr-2" /> Mark as Ready
-              </button>
-            </div>
-          )}
-          {order.status === "accepted" && order.deliveryOption === "delivery" && (
-            <div className="flex mt-3">
-              <button
-                onClick={() => updateStatus(order._id, "search")}
-                className="flex items-center border px-3 py-2 bg-green-200 hover:bg-green-300"
-              >
-                <MdOutlineDone className="text-green-600 mr-2" /> Mark as Ready
-              </button>
-            </div>
-          )}
+            {/* Buttons and status UI remain same */}
 
-          {order.status === "completed" && order.deliveryOption === "pickup" && (
-            <div className="flex flex-col mt-3 text-green-700 font-semibold">
-              <div className="flex items-center">
-                <MdOutlineDone className="mr-2" />
-                Order Completed
+            {order.status === "pending" && (
+              <div className="flex flex-wrap gap-3 mt-4 justify-center md:justify-start">
+                <button
+                  onClick={() => updateStatus(order._id, "accepted")}
+                  className="flex items-center border px-3 py-2 bg-green-100 hover:bg-green-200 rounded"
+                >
+                  <MdOutlineDone className="text-green-500 mr-2" /> Accept Order
+                </button>
+                <button
+                  onClick={() => updateStatus(order._id, "cancelled")}
+                  className="flex items-center border px-3 py-2 hover:bg-red-200 rounded"
+                >
+                  <MdCancel className="text-red-500 mr-2" /> Cancel Order
+                </button>
               </div>
-              {order.rating > 0 && (
-                <div className="flex items-center mt-2">
-                  <span className="mr-2">Rating:</span>
-                  {[...Array(order.rating)].map((_, i) => (
-                    <IoStarSharp key={i} className="text-yellow-400 mr-1" />
-                  ))}
+            )}
+
+            {order.status === "accepted" && order.deliveryOption === "pickup" && (
+              <div className="flex justify-center md:justify-start mt-4">
+                <button
+                  onClick={async () => updateStatus(order._id, "completed")}
+                  className="flex items-center border px-3 py-2 bg-green-200 hover:bg-green-300 rounded"
+                >
+                  <MdOutlineDone className="text-green-600 mr-2" /> Mark as Ready
+                </button>
+              </div>
+            )}
+            {order.status === "accepted" && order.deliveryOption === "delivery" && (
+              <div className="flex justify-center md:justify-start mt-4">
+                <button
+                  onClick={() => updateStatus(order._id, "search")}
+                  className="flex items-center border px-3 py-2 bg-green-200 hover:bg-green-300 rounded"
+                >
+                  <MdOutlineDone className="text-green-600 mr-2" /> Mark as Ready
+                </button>
+              </div>
+            )}
+
+            {order.status === "completed" && order.deliveryOption === "pickup" && (
+              <div className="flex flex-col mt-4 text-green-700 font-semibold items-center md:items-start">
+                <div className="flex items-center">
+                  <MdOutlineDone className="mr-2" />
+                  Order Completed
                 </div>
-              )}
-            </div>
-          )}
+                {order.rating > 0 && (
+                  <div className="flex items-center mt-2">
+                    <span className="mr-2">Rating:</span>
+                    {[...Array(order.rating)].map((_, i) => (
+                      <IoStarSharp key={i} className="text-yellow-400 mr-1" />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
-          {order.status === "search" && order.deliveryOption === "delivery" && (
-            <div className="flex flex-col mt-3 text-green-700 font-semibold">
-              <button
-                onClick={() => handleShowMap(order)}
-                className="mt-2 px-4 py-2 border rounded-md bg-blue-200 hover:bg-blue-300"
-              >
-                Show Delivery location
-              </button>
+            {order.status === "search" && order.deliveryOption === "delivery" && (
+              <div className="flex flex-col mt-4 text-green-700 font-semibold">
+                <button
+                  onClick={() => handleShowMap(order)}
+                  className="mt-2 px-4 py-2 border rounded-md bg-blue-200 hover:bg-blue-300 w-full max-w-xs mx-auto"
+                >
+                  Show Delivery location
+                </button>
 
-              {showMap && selectedOrderLocation === order._id && (
-                <PickMap showMap={showMap} setShowMap={setShowMap} route={routeCoords} />
-              )}
+                {showMap && selectedOrderLocation === order._id && (
+                  <PickMap showMap={showMap} setShowMap={setShowMap} route={routeCoords} />
+                )}
                 <>
                   <input
                     onChange={(e) =>
@@ -250,68 +245,65 @@ function Order() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <div
-                    className="flex cursor-pointer flex-row items-center border px-3 py-3 mt-3 hover:bg-green-200"
+                    className="flex cursor-pointer flex-row items-center border px-3 py-3 mt-3 hover:bg-green-200 rounded"
                     onClick={async () => {
-                      await senddata(order._id); 
-                      updateStatus(order._id, "completed"); 
+                      await senddata(order._id);
+                      updateStatus(order._id, "completed");
                     }}
                   >
-                    
                     <MdOutlineDone className={`text-green-500 mr-2`} size={22} />
                     <span>Submit Delivery Info</span>
                   </div>
 
-                  <div className="flex cursor-pointer flex-row items-center border px-3 py-3 mt-2 hover:bg-green-200">
+                  <div className="flex cursor-pointer flex-row items-center border px-3 py-3 mt-2 hover:bg-green-200 rounded">
                     <MdOutlineShare className={`text-green-500 mr-2`} size={22} />
                     <span>Share Delivery Location</span>
                   </div>
                 </>
-              
-            </div>
-          )}
-          {order.status === "completed" && order.deliveryOption === "delivery" && (
-            <div className="flex items-center border px-3 py-3 bg-green-300 text-green-900 font-semibold select-none mt-4">
-            <MdOutlineDone className="mr-2" size={22} />
-            <span>This order is being delivered</span>
-          </div>
-          )}
-
-          {order.status === "cancelled" && (
-            <div className="flex items-center mt-3 text-red-600 font-semibold">
-              <MdCancel className="mr-2" />
-              Order Cancelled
-            </div>
-          )}
-
-{order.status === "finished" && order.deliveryOption === "delivery" && (
-            <div className="flex flex-col mt-3 text-green-700 font-semibold">
-              <div className="flex items-center">
-                <MdOutlineDone className="mr-2" />
-                Order Completed
               </div>
-              {order.rating > 0 && (
-                <div className="flex items-center mt-2">
-                  <span className="mr-2">Rating:</span>
-                  {[...Array(order.rating)].map((_, i) => (
-                    <IoStarSharp key={i} className="text-yellow-400 mr-1" />
-                  ))}
+            )}
+
+            {order.status === "completed" && order.deliveryOption === "delivery" && (
+              <div className="flex items-center border px-3 py-3 bg-green-300 text-green-900 font-semibold select-none mt-4 rounded">
+                <MdOutlineDone className="mr-2" size={22} />
+                <span>This order is being delivered</span>
+              </div>
+            )}
+
+            {order.status === "cancelled" && (
+              <div className="flex items-center mt-3 text-red-600 font-semibold">
+                <MdCancel className="mr-2" />
+                Order Cancelled
+              </div>
+            )}
+
+            {order.status === "finished" && order.deliveryOption === "delivery" && (
+              <div className="flex flex-col mt-3 text-green-700 font-semibold">
+                <div className="flex items-center">
+                  <MdOutlineDone className="mr-2" />
+                  Order Completed
                 </div>
-              )}
-            </div>
-          )}
-        </div>
-      ))}
+                {order.rating > 0 && (
+                  <div className="flex items-center mt-2">
+                    <span className="mr-2">Rating:</span>
+                    {[...Array(order.rating)].map((_, i) => (
+                      <IoStarSharp key={i} className="text-yellow-400 mr-1" />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
     </div>
   );
 }
 
-function PropValue({ property, value }) {
-  return (
-    <div className="flex flex-row w-full justify-between border-b py-2">
-      <div className="font-semibold">{property}</div>
-      <div>{value}</div>
-    </div>
-  );
-}
+const PropValue = ({ property, value }) => (
+  <div className="flex flex-row w-full justify-between border-b py-2 text-sm sm:text-base">
+    <div className="font-semibold">{property}</div>
+    <div className="text-gray-700 max-w-[70%] break-words">{value}</div>
+  </div>
+);
 
 export default Order;

@@ -36,7 +36,17 @@ status: {
     default: "pending"
 },
 accompanimentsName:{
-      type: String,      
+  name: {
+    type: String,
+   
+},
+price: {
+    type: Number,
+   
+},
+isFree: {
+    type: String,
+},     
 },
 rating: { 
   type: Number,

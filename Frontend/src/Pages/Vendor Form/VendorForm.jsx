@@ -23,7 +23,7 @@ const VendorForm = () => {
       address: '',
     },
   });
-  console.log("Data",formData)
+  //console.log("Data",formData)
 
   const [showMap, setShowMap] = useState(false);
   const [coords, setCoords] = useState([-1.6221, 6.923]);

@@ -128,6 +128,8 @@ router.get('/orderinfo', async (req,res)=> {
     const pendingOrders = orders.filter(o => o.status === 'pending').length
     const cancelledOrders = orders.filter(o =>o.status==='cancelled').length
     const completedOrders = orders.filter(o=>o.status === 'completed').length 
+    const finishedOrders = orders.filter(o=>o.status === 'finished').length 
+
 
     const totalEarning = orders
     .filter(o => o.status === 'completed')
@@ -143,6 +145,7 @@ router.get('/orderinfo', async (req,res)=> {
       cancelledOrders,
       completedOrders,
       totalEarning,
+      finishedOrders,
       potentialEarning
     })
 

@@ -42,7 +42,7 @@ function Login({ darkmode, toggle }) {
   return (
     <div>
       <Navbar darkmode={darkmode} toggle={toggle} />
-      <div className={`${darkmode ? 'bg-gray-800 text-white' : ''} container mx-auto flex flex-col md:flex-row items-center justify-center min-h-[80vh] px-4 py-8 relative top-36`}>
+      <div className={`${darkmode ? 'bg-gray-950 text-white h-16' : ''} container mx-auto flex flex-col md:flex-row items-center justify-center min-h-[128vh] px-4 py-8 relative top-16`}>
 
         {/* Image Section - hidden on mobile */}
         <div className="hidden md:block w-full max-w-sm h-[400px] flex-1">
@@ -54,7 +54,7 @@ function Login({ darkmode, toggle }) {
         </div>
 
         {/* Login Form */}
-        <div className="w-full max-w-sm h-[400px] flex-1 bg-white dark:bg-gray-900 border rounded-sm shadow-lg p-6 space-y-4 flex flex-col justify-center">
+        <div className={`w-full max-w-sm h-[400px] flex-1 bg-white dark:bg-gray-900 border rounded-sm shadow-lg p-6 space-y-4 flex flex-col justify-center `}>
           <h1 className="text-2xl text-center font-bold text-yellow-300">Login</h1>
           <form onSubmit={handleChange} className="space-y-4">
             <div>

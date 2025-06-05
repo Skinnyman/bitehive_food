@@ -8,15 +8,25 @@ router.post("/ordered",async(req,res) =>{
  const{mealName,mealId, price,quantity,deliveryOption,totalPrice,userId,cusId,deliveryCharge,accompanimentsName}= req.body;
 //  let parsedAccompaniment;
 //  try {
-//    parsedAccompaniment = JSON.parse(accompaniments);
+//    parsedAccompaniment = JSON.parse(accompanimentsName);
 //  } catch (error) {
 //    parsedAccompaniment = []; // fallback
-//    //console.log(parsedAccompaniment)
+//    console.log("data",parsedAccompaniment)
 //  }
- const ordered = await orderedMeal.create({mealName,mealId, price,quantity,deliveryOption,totalPrice,userId,cusId,deliveryCharge,accompanimentsName});
+// If accompanimentsName is an array and you want just the first object:
+let accompanimentObj = {};
+
+if (Array.isArray(accompanimentsName) && accompanimentsName.length > 0) {
+  accompanimentObj = accompanimentsName[0];
+} else if (typeof accompanimentsName === 'object') {
+  accompanimentObj = accompanimentsName;
+}
+ const ordered = await orderedMeal.create({mealName,mealId, price,quantity,deliveryOption,totalPrice,userId,cusId,deliveryCharge,accompanimentsName: accompanimentObj});
     res.status(201).json(ordered);    
 
     console.log(req.body)
+    console.log(ordered)
+    
 })
 
 // Adding deliveryfee
@@ -24,23 +34,29 @@ router.patch("/deliveryfee", async (req, res) => {
   const { deliveryCharge, userId, orderId } = req.body;
 
   try {
-    const updatedOrder = await orderedMeal.findOneAndUpdate(
-      { userId: userId, _id: orderId },
-      { $set: { deliveryCharge } },
-      { new: true }
-    );
+    // Find the current order first
+    const order = await orderedMeal.findOne({ userId: userId, _id: orderId });
 
-    if (!updatedOrder) {
+    if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    res.status(200).json(updatedOrder);
-   // console.log(updatedOrder)
+    // Add deliveryCharge to totalPrice
+    const newTotalPrice = (order.totalPrice || 0) + (deliveryCharge || 0);
+
+    // Update both deliveryCharge and totalPrice
+    order.deliveryCharge = deliveryCharge;
+    order.totalPrice = newTotalPrice;
+
+    await order.save();
+
+    res.status(200).json(order);
   } catch (error) {
     console.error("Error in /deliveryfee route:", error);
     res.status(500).json({ message: "Failed to update delivery fee", error });
   }
 });
+
 
 
 //Getting delivery information from the user

@@ -13,7 +13,7 @@ import { ToastContainer } from 'react-toastify';
 
 //  Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem('token'); 
+  const isAuthenticated = localStorage.getItem('token','user'); 
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
