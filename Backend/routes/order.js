@@ -24,8 +24,8 @@ if (Array.isArray(accompanimentsName) && accompanimentsName.length > 0) {
  const ordered = await orderedMeal.create({mealName,mealId, price,quantity,deliveryOption,totalPrice,userId,cusId,deliveryCharge,accompanimentsName: accompanimentObj});
     res.status(201).json(ordered);    
 
-    console.log(req.body)
-    console.log(ordered)
+    // console.log(req.body)
+    // console.log(ordered)
     
 })
 

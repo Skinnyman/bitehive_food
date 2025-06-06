@@ -135,7 +135,7 @@ function MealCard({toggle,darkmode}) {
     setShowModal(false);
     
   };
-console.log(accompanimentsName)
+//console.log(accompanimentsName)
 
 
   return (
@@ -151,7 +151,7 @@ console.log(accompanimentsName)
 							?.toLowerCase()
 							.includes(orders.toLowerCase()) &&
          (
-        <div key={meal._id} className={`${darkmode ? 'bg-gray-950 text-white h-16' : ''}border w-[350px] h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center bg-white relative right-10`}>
+        <div key={meal._id} className={`${darkmode ? 'bg-gray-800 text-white h-16' : ''}border w-[350px] h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center bg-white relative right-10`}>
           <div className="w-2/5 flex justify-center items-center">
             <div className="h-36 w-36 bg-slate-400 rounded-xl overflow-hidden">
               <img

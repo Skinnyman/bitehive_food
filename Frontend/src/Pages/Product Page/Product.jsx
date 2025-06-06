@@ -111,7 +111,7 @@ const Product = () => {
             Add Product
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
               <div>
                 <label className="block font-medium mb-1">Product Name</label>
                 <input
@@ -244,7 +244,7 @@ const Product = () => {
         </div>
 
         {/* Preview */}
-        <div className="w-full lg:w-1/3 bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center">
+        <div className="w-full lg:w-1/3 bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center h-full">
           <h2 className="text-xl font-bold mb-6 flex items-center gap-3 bg-cyan-500 text-white rounded p-1 w-32">
             Preview
           </h2>

@@ -5,9 +5,11 @@ import { serverport } from '../../Static/Variables';
 import { useOrder } from '../../context/OrderContext';
 
 
+
 function Order() {
   const [allOrders, setAllOrders] = useState([]);
   const [ordersInfo, setOrdersInfo] = useState({});
+  const[vendInfo,setVendInfo] = useState({})
   const cusId = localStorage.getItem('id');
   const {orders} = useOrder();
 

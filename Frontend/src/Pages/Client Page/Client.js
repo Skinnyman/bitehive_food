@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import Navbar from '../../Components/Navbar';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
@@ -9,9 +9,35 @@ import Meal from "../Meal Page/Meal"
 import Order from "../Order Page/Order"
 import VendorInfo from '../VendorInfo/VendorInfo';
 import DietPlanner from '../Diet Planner/DietPlanner';
+import io from "socket.io-client"
+import { serverport } from '../../Static/Variables';
+import { toast } from 'react-toastify';
+const socket =io(serverport) 
 
 function Client({ toggle, darkmode }) {
+
+  useEffect(() => {
+          const userId = localStorage.getItem("id"); 
+          if (userId) {
+            socket.emit("registrationcustomer", userId);
+          }
+          socket.on('accept', (data) => {
+           // alert(data.message);
+            toast.success(data.message,{
+              position:"top-right",
+              autoClose:9000,
+              hideProgressBar:false,
+            });
+            // Optionally update state to show the order in UI
+          });
+      
+          return () => {
+            socket.off('accept');
+          };
+        
+        });
   const isLoggedIn = !!localStorage.getItem("token");
+
 
   const [isOpen, setIsOpen] = useState(false);
   const [activePage, setActivePage] = useState('Meals');
@@ -65,9 +91,9 @@ function Client({ toggle, darkmode }) {
     <div className={`${darkmode ? 'bg-gray-950 text-white h-16' : ''} `}>
       <div className="min-h-screen bg-white text-black dark:bg-black dark:text-white relative">
         {/* Hamburger Icon */}
-        <div className="md:hidden fixed top-4 left-1 z-50">
+        <div className={`md:hidden fixed top-4 left-1 z-50`}>
           <button onClick={handleHamburgerClick}>
-            <Bars3Icon className="h-8 w-8 text-gray-700 dark:text-white" />
+            <Bars3Icon className={`h-8 w-8 text-gray-700 dark:text-white ${darkmode ? 'bg-white ' : ''}`} />
           </button>
         </div>
 

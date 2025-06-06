@@ -6,8 +6,12 @@ import { motion } from "framer-motion";
 import { serverport } from "../Static/Variables";
 import PickMap from "./PickMap";
 import { toast } from "react-toastify";
+import io from "socket.io-client";
+
+const socket = io(serverport)
 
 function OrderInformation({ order, fetchOrders, info }) {
+  const username = localStorage.getItem("username")
   const [status, setStatus] = useState(order.status);
   const [rating, setRating] = useState(order.rating);
   const [editedRating, setEditedRating] = useState(false);
@@ -15,8 +19,11 @@ function OrderInformation({ order, fetchOrders, info }) {
   const [routeCoords, setRouteCoords] = useState(null);
   const [longitude, setLongitude] = useState("");
   const [latitude, setlatitude] = useState("");
+  const[phone,setPhone] = useState("");
+  const [venName,setvenName] = useState("");
 
   const handleCancel = async () => {
+    socket.emit("place_order",{message:`order cancelled from ${username}`,vendorId:order.userId})
     await axios.patch(`${serverport}/api/order/status/${order._id}`, {
       status: "cancelled",
     });
@@ -38,6 +45,22 @@ function OrderInformation({ order, fetchOrders, info }) {
         console.error("Failed to fetch vendor location:", err);
       });
   }, [userId]);
+  useEffect(() => {
+    axios
+      .get(`${serverport}/api/vendor/vendorinfo?userId=${userId}`)
+      .then((res) => {
+        const ven = res.data[0]
+        if(ven){
+          setvenName(ven.contactPerson);
+          setPhone(ven.phone)
+        }
+       
+      })
+      .catch((err) => {
+        console.error("Failed to fetch vendor location:", err);
+      });
+  }, [userId]);
+  //console.log("data",vendInfo)
 
   const handleShowMap = () => {
     navigator.geolocation.getCurrentPosition(
@@ -95,6 +118,13 @@ function OrderInformation({ order, fetchOrders, info }) {
             <PropValue property="Rider's Name:" value={info.Deliveryman} />
             <PropValue property="Rider's Contact:" value={info.Deliveryphone} />
           </>
+        )}
+        {order.deliveryOption === "pickup" && status === "completed" && (
+           <>
+           <PropValue property="Vendor's Name:" value={phone} />
+           <PropValue property="Vendor's Contact:" value={venName} />
+         
+         </>
         )}
       </div>
 

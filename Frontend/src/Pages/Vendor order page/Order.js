@@ -4,6 +4,8 @@ import { IoStarSharp } from "react-icons/io5";
 import axios from "axios";
 import { serverport } from "../../Static/Variables";
 import PickMap from "../../Components/PickMap";
+import io from "socket.io-client";
+const socket = io(serverport)
 
 function Order() {
   const [allorder, setAllOrder] = useState([]);
@@ -53,6 +55,7 @@ function Order() {
   }, []);
 
   const updateStatus = async (id, newStatus) => {
+  
     await axios.patch(`${serverport}/api/order/status/${id}`, {
       status: newStatus,
     });
@@ -93,6 +96,7 @@ function Order() {
       console.error("Error submitting delivery data:", err);
     }
   };
+ 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-2 md:px-8">
@@ -131,13 +135,13 @@ function Order() {
             {order.status === "pending" && (
               <div className="flex flex-wrap gap-3 mt-4 justify-center md:justify-start">
                 <button
-                  onClick={() => updateStatus(order._id, "accepted")}
+                  onClick={() => updateStatus(order._id, "accepted", socket.emit("accept",{message:`order accepted `,cusId:order.cusId})) }
                   className="flex items-center border px-3 py-2 bg-green-100 hover:bg-green-200 rounded"
                 >
                   <MdOutlineDone className="text-green-500 mr-2" /> Accept Order
                 </button>
                 <button
-                  onClick={() => updateStatus(order._id, "cancelled")}
+                  onClick={() => updateStatus(order._id, "cancelled", socket.emit("accept",{message:`order cancelled `,cusId:order.cusId}))}
                   className="flex items-center border px-3 py-2 hover:bg-red-200 rounded"
                 >
                   <MdCancel className="text-red-500 mr-2" /> Cancel Order
@@ -148,7 +152,7 @@ function Order() {
             {order.status === "accepted" && order.deliveryOption === "pickup" && (
               <div className="flex justify-center md:justify-start mt-4">
                 <button
-                  onClick={async () => updateStatus(order._id, "completed")}
+                  onClick={async () => updateStatus(order._id, "completed",socket.emit("accept",{message:`order completed `,cusId:order.cusId}))}
                   className="flex items-center border px-3 py-2 bg-green-200 hover:bg-green-300 rounded"
                 >
                   <MdOutlineDone className="text-green-600 mr-2" /> Mark as Ready
@@ -248,7 +252,7 @@ function Order() {
                     className="flex cursor-pointer flex-row items-center border px-3 py-3 mt-3 hover:bg-green-200 rounded"
                     onClick={async () => {
                       await senddata(order._id);
-                      updateStatus(order._id, "completed");
+                      updateStatus(order._id, "completed",socket.emit("accept",{message:`order completed `,cusId:order.cusId}));
                     }}
                   >
                     <MdOutlineDone className={`text-green-500 mr-2`} size={22} />

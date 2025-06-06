@@ -48,6 +48,17 @@ router.put('/update-business', async (req, res) => {
   }
 });
 
+router.get("/vendorinfo",async(req,res)=>{
+  const {userId} = req.query;
+  try{
+    const info = await Vendor.find({userId});
+    if (!info) return res.status(404).json({ message: 'Vendor not found' });
+    res.json(info)
+  }catch(err){
+    res.json({error:'Failed to fetch business data'})
+  }
+})
+
 router.post('/favorite', async (req, res) => {
     const{customerId,vendorId}= req.body;
     const favorite = await Favorite.create({customerId,vendorId});

@@ -16,6 +16,7 @@ const orderRoutes = require('./routes/order')
  
 
 const port = process.env.PORT || 5001
+const frontPort = process.env.FRONTEND
 
 const app = express();
 const server = http.createServer(app);
@@ -27,22 +28,43 @@ app.use(cors());
 
 const io = new Server(server,{
     cors:{
-        origin:'http://localhost:3000',
+        origin:{frontPort},
         methods:["GET","POST"],
     },
 });
 let vendorSockets = {};
+let customerSockets = {};
 
 io.on("connection",(socket) => {
    //console.log(`User connected:${socket.id}`)
 //    socket.on("send_message",(data)=>{
 //     socket.broadcast.emit("receive_message",data)
 //    })
-
+  // register vendors with a socket Id
    socket.on('registerVendor', (vendorId) => {
     vendorSockets[vendorId] = socket.id;
-    console.log(`Vendor ${vendorId} registered with socket ${socket.id}`);
+    //console.log(`Vendor ${vendorId} registered with socket ${socket.id}`);
   });
+
+  // register vendors with socketId
+  socket.on("registrationcustomer",(userId)=>{
+     customerSockets[userId] = socket.id;
+     console.log(`customer ${userId} registered with socket ${socket.id}`);
+  })
+// message to customer when the vendor clicks accept order
+  socket.on("accept",(data)=>{
+    //console.log("This is the message",data.message)
+    const userId = data.cusId
+    //console.log(userId)
+
+    // notify the customer 
+    const customerSocketId = customerSockets[userId];
+    if (customerSocketId){
+      io.to(customerSocketId).emit("accept",data)
+    }
+  })
+
+  // message is from the user to the vendor when the user clicks order
   socket.on("place_order",(data)=>{
     //console.log("This is the message",data.message)
     const vendorId = data.vendorId;
@@ -61,7 +83,17 @@ io.on("connection",(socket) => {
         break;
       }
     }
-  });
+  }
+);
+  socket.on('disconnect', () => {
+    for (const userId in customerSockets) {
+      if (customerSockets[userId] === socket.id) {
+        delete customerSockets[userId];
+        break;
+      }
+    }
+  }
+);
 
 })
 
