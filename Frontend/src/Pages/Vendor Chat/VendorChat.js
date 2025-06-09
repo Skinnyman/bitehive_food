@@ -1,28 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaPaperPlane } from "react-icons/fa6";
 import { serverport } from "../../Static/Variables";
 import io from "socket.io-client";
 
-const socket = io(serverport)
+const socket = io(serverport);
 
 const VendorChat = () => {
-    const vendorId = localStorage.getItem("id")
+  const vendorId = localStorage.getItem("id");
   const [conversations, setConversations] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
   const [text, setText] = useState("");
   const [messages, setMessages] = useState([]);
   const [notifications, setNotifications] = useState({});
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    console.log(vendorId)
     socket.emit("registerUser", vendorId);
 
     socket.on("receiveMessage", (data) => {
       const senderId = data.senderId;
+      const username = data.username;
+
       setNotifications((prev) => ({ ...prev, [senderId]: true }));
+
       if (!conversations.includes(senderId)) {
         setConversations((prev) => [...prev, senderId]);
       }
+
       if (activeChat === senderId) {
         setMessages((prev) => [...prev, { sender: "client", text: data.text }]);
       }
@@ -31,7 +35,11 @@ const VendorChat = () => {
     return () => {
       socket.off("receiveMessage");
     };
-  }, [vendorId, activeChat]);
+  }, [vendorId, activeChat, conversations]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const openChat = (clientId) => {
     setActiveChat(clientId);
@@ -51,28 +59,75 @@ const VendorChat = () => {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleSend();
+  };
+
   return (
-    <div className="vendor-chat-panel">
-      <div className="sidebar">
+    <div className="flex flex-col md:flex-row h-[80vh] max-w-5xl mx-auto border rounded-lg shadow-lg bg-white overflow-hidden">
+      {/* Sidebar */}
+      <div className="w-full md:w-1/3 border-r bg-gray-100 p-4 overflow-y-auto">
+        <h2 className="text-lg font-semibold mb-4">Clients</h2>
         {conversations.map((clientId) => (
-          <div key={clientId} onClick={() => openChat(clientId)}>
-            👤 {clientId} {notifications[clientId] && <span className="notify-dot" />}
+          <div
+            key={clientId}
+            onClick={() => openChat(clientId)}
+            className={`flex items-center justify-between cursor-pointer px-4 py-2 rounded hover:bg-gray-200 transition ${
+              activeChat === clientId ? "bg-blue-100" : ""
+            }`}
+          >
+            <span>👤 {clientId}</span>
+            {notifications[clientId] && (
+              <span className="w-2 h-2 bg-red-600 rounded-full"></span>
+            )}
           </div>
         ))}
       </div>
-      <div className="chat-window">
-        {activeChat && (
+
+      {/* Chat Window */}
+      <div className="w-full md:w-2/3 flex flex-col">
+        {activeChat ? (
           <>
-            <div className="messages">
+            {/* Messages */}
+            <div className="flex-grow overflow-y-auto p-4 space-y-3 bg-gray-50">
               {messages.map((msg, i) => (
-                <div key={i} className={msg.sender === "vendor" ? "msg-right" : "msg-left"}>
+                <div
+                  key={i}
+                  className={`max-w-[80%] px-4 py-2 rounded-xl text-sm break-words ${
+                    msg.sender === "vendor"
+                      ? "ml-auto bg-blue-600 text-white rounded-br-none"
+                      : "mr-auto bg-gray-300 text-gray-900 rounded-bl-none"
+                  }`}
+                >
                   {msg.text}
                 </div>
               ))}
+              <div ref={messagesEndRef} />
             </div>
-            <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Reply..." />
-            <button onClick={handleSend}><FaPaperPlane /></button>
+
+            {/* Input */}
+            <div className="flex items-center border-t p-3 bg-white">
+              <input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                type="text"
+                placeholder="Reply..."
+                className="flex-grow px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <button
+                onClick={handleSend}
+                className="ml-3 p-3 text-white bg-blue-600 hover:bg-blue-700 rounded-full transition"
+                aria-label="Send"
+              >
+                <FaPaperPlane />
+              </button>
+            </div>
           </>
+        ) : (
+          <div className="flex flex-col items-center justify-center flex-grow text-gray-500">
+            <p>Select a client to start chatting</p>
+          </div>
         )}
       </div>
     </div>

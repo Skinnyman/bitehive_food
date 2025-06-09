@@ -59,11 +59,11 @@ io.on("connection",(socket) => {
     console.log(`User ${userId} registered with socket ${socket.id}`);
   });
   // Handle message sending
-  socket.on("sendMessage", ({ senderId, receiverId, text }) => {
+  socket.on("sendMessage", ({ senderId, receiverId, text,username }) => {
     
     const receiverSocketId = onlineUsers[receiverId];
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit("receiveMessage", { senderId, text });
+      io.to(receiverSocketId).emit("receiveMessage", { senderId, text,username });
       io.to(receiverSocketId).emit("newMessageNotification", { from: senderId });
     }
   });
