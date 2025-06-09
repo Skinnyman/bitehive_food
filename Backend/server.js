@@ -34,6 +34,7 @@ const io = new Server(server,{
 });
 let vendorSockets = {};
 let customerSockets = {};
+let onlineUsers = {};
 
 io.on("connection",(socket) => {
    //console.log(`User connected:${socket.id}`)
@@ -49,8 +50,23 @@ io.on("connection",(socket) => {
   // register vendors with socketId
   socket.on("registrationcustomer",(userId)=>{
      customerSockets[userId] = socket.id;
-     console.log(`customer ${userId} registered with socket ${socket.id}`);
+     //console.log(`customer ${userId} registered with socket ${socket.id}`);
   })
+  // Register user
+  socket.on("registerUser", (userId) => {
+   
+    onlineUsers[userId] = socket.id;
+    console.log(`User ${userId} registered with socket ${socket.id}`);
+  });
+  // Handle message sending
+  socket.on("sendMessage", ({ senderId, receiverId, text }) => {
+    
+    const receiverSocketId = onlineUsers[receiverId];
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("receiveMessage", { senderId, text });
+      io.to(receiverSocketId).emit("newMessageNotification", { from: senderId });
+    }
+  });
 // message to customer when the vendor clicks accept order
   socket.on("accept",(data)=>{
     //console.log("This is the message",data.message)
@@ -94,6 +110,17 @@ io.on("connection",(socket) => {
     }
   }
 );
+socket.on("disconnect", () => {
+  for (let userId in onlineUsers) {
+    if (onlineUsers[userId] === socket.id) {
+      delete onlineUsers[userId];
+      console.log(`User ${userId} disconnected`);
+      break;
+    }
+  }
+});
+
+
 
 })
 

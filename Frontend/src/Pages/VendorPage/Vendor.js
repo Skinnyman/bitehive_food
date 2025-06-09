@@ -7,12 +7,14 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { FaComments } from "react-icons/fa6";
 import Profile from '../Profile page/Profile';
 import Product from '../Product Page/Product';
 import Order from '../Vendor order page/Order';
 import { toast } from 'react-toastify';
 import { serverport } from '../../Static/Variables';
 import io from "socket.io-client";
+import VendorChat from '../Vendor Chat/VendorChat';
 const socket = io(serverport);
 
 function Vendor() {
@@ -45,6 +47,7 @@ function Vendor() {
     { label: 'Profile', icon: <PersonIcon fontSize="small" /> },
     { label: 'Products', icon: <Inventory2Icon fontSize="small" /> },
     { label: 'Orders', icon: <ShoppingCartIcon fontSize="small" /> },
+    { label: 'Chat', icon: <FaComments fontSize="small" /> },
     { label: 'Settings & Preferences', icon: <SettingsIcon fontSize="small" /> },
     { label: 'Support & Help', icon: <HelpOutlineIcon fontSize="small" /> },
     { label: 'Logout', icon: <LogoutIcon fontSize="small" /> },
@@ -62,6 +65,8 @@ function Vendor() {
         return <div className="text-xl font-semibold p-4"><Product/></div>;
       case 'Orders':
         return <div className="text-xl font-semibold p-4"><Order/></div>;
+      case 'Chat':
+        return <div  className="text-xl font-semibold p-4"><VendorChat/></div>
       case 'Settings & Preferences':
         return <div className="text-xl font-semibold p-4"><h1>This is setting</h1></div>;
       case 'Support & Help':

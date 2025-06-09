@@ -19,7 +19,7 @@ BiteHive is a full-stack food ordering and vendor management platform, where use
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/bitehive.git
+git clone https://github.com/Skinnyman/bitehive.git
 cd bitehive
 ```
 

@@ -119,7 +119,7 @@ function VendorCard({ buss }) {
             className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <Chat />
+            <Chat vendorId={buss.userId} />
           </div>
         </div>
       )}
