@@ -1,18 +1,19 @@
 const express = require("express");
 const cors = require("cors");
 const path = require('path');
-const http = require("http")
-const {Server} = require("socket.io")
+const http = require("http");
+const {Server} = require("socket.io");
+const Message = require("./Models/message");
 
 
-
-require("./services/db")
+require("./services/db");
 
 require('dotenv').config();
 const authRoutes = require("./routes/auth");
 const vendorRoutes = require("./routes/vendor")
 const mealRoutes = require("./routes/meal")
 const orderRoutes = require('./routes/order')
+const messageRoutes = require("./routes/message");
  
 
 const port = process.env.PORT || 5001
@@ -59,7 +60,10 @@ io.on("connection",(socket) => {
     console.log(`User ${userId} registered with socket ${socket.id}`);
   });
   // Handle message sending
-  socket.on("sendMessage", ({ senderId, receiverId, text,username }) => {
+  socket.on("sendMessage",async ({ senderId, receiverId, text,username }) => {
+    // save to database
+    const newMessage = new Message({ senderId, receiverId, text,username });
+    await newMessage.save();
     
     const receiverSocketId = onlineUsers[receiverId];
     if (receiverSocketId) {
@@ -131,10 +135,11 @@ app.use('/uploads', express.static(path.join(__dirname,'uploads') ))
 
 
 // routes
-app.use("/api/auth",authRoutes)
-app.use("/api/vendor",vendorRoutes)
-app.use("/api/meal",mealRoutes)
-app.use("/api/order",orderRoutes)
+app.use("/api/auth",authRoutes);
+app.use("/api/vendor",vendorRoutes);
+app.use("/api/meal",mealRoutes);
+app.use("/api/order",orderRoutes);
+app.use("/api/messages", messageRoutes);
 
 
 

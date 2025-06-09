@@ -7,7 +7,7 @@ const socket = io(serverport);
 
 const VendorChat = () => {
   const vendorId = localStorage.getItem("id");
-  const [conversations, setConversations] = useState([]);
+  const [conversations, setConversations] = useState([]); // [{id, username}]
   const [activeChat, setActiveChat] = useState(null);
   const [text, setText] = useState("");
   const [messages, setMessages] = useState([]);
@@ -18,17 +18,16 @@ const VendorChat = () => {
     socket.emit("registerUser", vendorId);
 
     socket.on("receiveMessage", (data) => {
-      const senderId = data.senderId;
-      const username = data.username;
+      const { senderId, username, text } = data;
 
       setNotifications((prev) => ({ ...prev, [senderId]: true }));
 
-      if (!conversations.includes(senderId)) {
-        setConversations((prev) => [...prev, senderId]);
+      if (!conversations.some((c) => c.id === senderId)) {
+        setConversations((prev) => [...prev, { id: senderId, username }]);
       }
 
       if (activeChat === senderId) {
-        setMessages((prev) => [...prev, { sender: "client", text: data.text }]);
+        setMessages((prev) => [...prev, { sender: "client", text }]);
       }
     });
 
@@ -44,7 +43,12 @@ const VendorChat = () => {
   const openChat = (clientId) => {
     setActiveChat(clientId);
     setNotifications((prev) => ({ ...prev, [clientId]: false }));
-    setMessages([]);
+    setMessages([]); // clear current messages
+
+    fetch(`${serverport}/api/messages/${clientId}/${vendorId}`)
+      .then((res) => res.json())
+      .then((data) => setMessages(data))
+      .catch((err) => console.error("Failed to load messages", err));
   };
 
   const handleSend = () => {
@@ -68,16 +72,16 @@ const VendorChat = () => {
       {/* Sidebar */}
       <div className="w-full md:w-1/3 border-r bg-gray-100 p-4 overflow-y-auto">
         <h2 className="text-lg font-semibold mb-4">Clients</h2>
-        {conversations.map((clientId) => (
+        {conversations.map((client) => (
           <div
-            key={clientId}
-            onClick={() => openChat(clientId)}
+            key={client.id}
+            onClick={() => openChat(client.id)}
             className={`flex items-center justify-between cursor-pointer px-4 py-2 rounded hover:bg-gray-200 transition ${
-              activeChat === clientId ? "bg-blue-100" : ""
+              activeChat === client.id ? "bg-blue-100" : ""
             }`}
           >
-            <span>👤 {clientId}</span>
-            {notifications[clientId] && (
+            <span>👤 {client.username}</span>
+            {notifications[client.id] && (
               <span className="w-2 h-2 bg-red-600 rounded-full"></span>
             )}
           </div>

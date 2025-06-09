@@ -25,6 +25,16 @@ const Chat = ({ vendorId }) => {
   }, [userId]);
 
   useEffect(() => {
+    if (userId && vendorId) {
+      fetch(`${serverport}/api/messages/${userId}/${vendorId}`)
+        .then((res) => res.json())
+        .then((data) => setMessages(data))
+        .catch((err) => console.error("Failed to load messages", err));
+    }
+  }, [userId, vendorId]);
+  
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
