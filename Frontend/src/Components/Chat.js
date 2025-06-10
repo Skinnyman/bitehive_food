@@ -28,17 +28,23 @@ const Chat = ({ vendorId }) => {
     if (userId && vendorId) {
       fetch(`${serverport}/api/messages/${userId}/${vendorId}`)
         .then((res) => res.json())
-        .then((data) => setMessages(data))
+        .then((data) => {
+          const formattedMessages = data.map((msg) => ({
+            text: msg.text,
+            sender: msg.senderId === userId ? "client" : "vendor", // map based on ID
+          }));
+          setMessages(formattedMessages);
+        })
         .catch((err) => console.error("Failed to load messages", err));
     }
   }, [userId, vendorId]);
-  
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSend = () => {
+    socket.emit("place_order",{message:`New Message from ${username}`,vendorId:vendorId})
     if (text.trim()) {
       socket.emit("sendMessage", {
         senderId: userId,
@@ -82,11 +88,11 @@ const Chat = ({ vendorId }) => {
           onKeyDown={handleKeyDown}
           type="text"
           placeholder="Type a message..."
-          className="flex-grow px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="flex-grow px-3 py-2 text-sm border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         <button
           onClick={handleSend}
-          className="ml-3 p-3 text-white bg-blue-600 hover:bg-blue-700 rounded-full transition"
+         className="ml-3 p-2 sm:p-3 text-white bg-blue-600 hover:bg-blue-700 rounded-full transition"
           aria-label="Send"
         >
           <FaPaperPlane />

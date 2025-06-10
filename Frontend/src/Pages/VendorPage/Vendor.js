@@ -42,6 +42,7 @@ function Vendor() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [activePage, setActivePage] = useState('Profile');
+ const vendorId = localStorage.getItem("id");
 
   const menuItems = [
     { label: 'Profile', icon: <PersonIcon fontSize="small" /> },
@@ -66,7 +67,7 @@ function Vendor() {
       case 'Orders':
         return <div className="text-xl font-semibold p-4"><Order/></div>;
       case 'Chat':
-        return <div  className="text-xl font-semibold p-4"><VendorChat/></div>
+        return <div  className="text-xl font-semibold p-4"><VendorChat vendorId={vendorId}/></div>
       case 'Settings & Preferences':
         return <div className="text-xl font-semibold p-4"><h1>This is setting</h1></div>;
       case 'Support & Help':

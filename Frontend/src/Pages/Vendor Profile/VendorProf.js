@@ -95,6 +95,7 @@ const [formdata, setFormdata] = useState({
     : price;
 
   const handleSubmitOrder = async () => {
+    const userId = localStorage.getItem('id');
     socket.emit("place_order",{message:`New order from ${username}`,vendorId:selectedMeal.userId})
     const orderData = {
       mealName: selectedMeal.name,
@@ -107,7 +108,7 @@ const [formdata, setFormdata] = useState({
       accompanimentsName:selectedMeal.accompaniment.name,
       chargeType: selectedMeal.chargeType,
       image: selectedMeal.image,
-     
+      cusId:userId,
     };
 
     //addOrder(orderData); // <-- Add instead of replace

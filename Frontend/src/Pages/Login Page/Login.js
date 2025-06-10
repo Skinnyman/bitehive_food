@@ -7,16 +7,18 @@ import { serverport } from '../../Static/Variables';
 
 function Login({ darkmode, toggle }) {
   const [formData, setformData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false); // <-- Loading state
   const navigate = useNavigate();
   const [error, setError] = useState("");
-
 
   const handleChange = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true); // Start loading
 
     try {
       const response = await axios.post(`${serverport}/api/auth/login`, formData);
+
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem('username', response.data.username);
@@ -33,9 +35,11 @@ function Login({ darkmode, toggle }) {
         }
       }
     } catch (err) {
-      const errorMsg = err.response.data.error || "Invalid credentials."
+      const errorMsg = err.response?.data?.error || "Invalid credentials.";
       console.error("login failed:", errorMsg);
       setError(errorMsg);
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -54,7 +58,7 @@ function Login({ darkmode, toggle }) {
         </div>
 
         {/* Login Form */}
-        <div className={`w-full max-w-sm h-[400px] flex-1 bg-white dark:bg-gray-900 border rounded-sm shadow-lg p-6 space-y-4 flex flex-col justify-center `}>
+        <div className="w-full max-w-sm h-[400px] flex-1 bg-white dark:bg-gray-900 border rounded-sm shadow-lg p-6 space-y-4 flex flex-col justify-center">
           <h1 className="text-2xl text-center font-bold text-yellow-300">Login</h1>
           <form onSubmit={handleChange} className="space-y-4">
             <div>
@@ -79,8 +83,40 @@ function Login({ darkmode, toggle }) {
               />
             </div>
 
-            <button type="submit" className="w-full py-2 text-white bg-yellow-400 rounded-md font-bold hover:bg-yellow-500 transition">
-              Login
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-2 text-white rounded-md font-bold transition flex justify-center items-center gap-2
+                ${loading ? 'bg-yellow-300 cursor-not-allowed' : 'bg-yellow-400 hover:bg-yellow-500'}
+              `}
+            >
+              {loading ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    ></path>
+                  </svg>
+                  Logging in...
+                </>
+              ) : (
+                "Login"
+              )}
             </button>
 
             {error && <p className="text-red-500 text-center font-semibold">{error}</p>}
