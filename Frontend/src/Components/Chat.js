@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { FaPaperPlane } from "react-icons/fa6";
 import { serverport } from "../Static/Variables";
 import io from "socket.io-client";
+import socket from "../Static/Socket";
 
-const socket = io(serverport);
+// const socket = io(serverport);
 
 const Chat = ({ vendorId }) => {
   const [messages, setMessages] = useState([]);

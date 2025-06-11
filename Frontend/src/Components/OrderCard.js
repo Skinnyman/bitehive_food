@@ -7,8 +7,9 @@ import { serverport } from "../Static/Variables";
 import PickMap from "./PickMap";
 import { toast } from "react-toastify";
 import io from "socket.io-client";
+import socket from "../Static/Socket";
 
-const socket = io(serverport)
+// const socket = io(serverport)
 
 function OrderInformation({ order, fetchOrders, info }) {
   const username = localStorage.getItem("username")

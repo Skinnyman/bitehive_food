@@ -13,7 +13,7 @@ import { ToastContainer } from 'react-toastify';
 
 //  Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem('token','user'); 
+  const isAuthenticated = localStorage.getItem('token'); 
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
@@ -37,7 +37,7 @@ function App() {
                   path="vendor"
                   element={
                     <ProtectedRoute>
-                 
+                      
 
                       <Vendor darkmode={darkmode} toggle={toggle} />
                     

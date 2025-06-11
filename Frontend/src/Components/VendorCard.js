@@ -6,6 +6,9 @@ import axios from 'axios';
 import { serverport } from '../Static/Variables';
 import Chat from './Chat';
 
+
+
+
 function PropValue({ property, value }) {
   return (
     <div className="flex justify-between w-full text-xs sm:text-sm md:text-base border-b py-1 sm:py-2 text-gray-700">
@@ -15,13 +18,15 @@ function PropValue({ property, value }) {
   );
 }
 
-function VendorCard({ buss }) {
+function VendorCard({ buss, isOnline }) {
+
   const [isFav, setIsFav] = useState(false);
   const vendorId = buss.userId;
   const customerId = localStorage.getItem('id');
   const [showchat, setShowChat] = useState(false);
   const [ratings, setRatings] = useState({ averageRating: 0 });
 
+ 
   useEffect(() => {
     const checkFavorite = async () => {
       try {
@@ -59,6 +64,7 @@ function VendorCard({ buss }) {
   const handleChat = () => {
     setShowChat(true);
   };
+  //console.log("data",isOnline)
 
   return (
     <motion.div
@@ -68,9 +74,18 @@ function VendorCard({ buss }) {
       transition={{ duration: 0.5 }}
     >
       <Link to={`/vendor/${buss.userId}`} className="block">
-        <div className="text-center text-lg sm:text-xl font-bold text-blue-700 mb-3 truncate">
+    <div className="flex justify-between items-center mb-3">
+        <div className="text-lg sm:text-xl font-bold text-blue-700 truncate">
           Vendor Info
         </div>
+        <div
+          className={`w-3 h-3 rounded-full ${
+            isOnline ? 'bg-green-500' : 'bg-gray-400'
+          }`}
+          title={isOnline ? 'Online' : 'Offline'}
+        ></div>
+     </div>
+
 
         <div className="space-y-1 mb-3">
           <PropValue property="Business Name:" value={buss.businessName} />

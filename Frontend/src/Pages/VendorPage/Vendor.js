@@ -17,6 +17,7 @@ import io from "socket.io-client";
 import VendorChat from '../Vendor Chat/VendorChat';
 const socket = io(serverport);
 
+
 function Vendor() {
   
     useEffect(() => {
@@ -36,13 +37,23 @@ function Vendor() {
     
         return () => {
           socket.off('newOrder');
+       
         };
       
       });
+const vendorId = localStorage.getItem("id");
+useEffect(()=>{
+  // const vendorId = localStorage.getItem("id");
+  //console.log("num:",vendorId);
+  if (vendorId) {
+    socket.emit("vendor-online", vendorId);
+  }
+ 
+},[vendorId])
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [activePage, setActivePage] = useState('Profile');
- const vendorId = localStorage.getItem("id");
+
 
   const menuItems = [
     { label: 'Profile', icon: <PersonIcon fontSize="small" /> },
@@ -79,7 +90,10 @@ function Vendor() {
     }
   };
 
-  const handleItemClick = (label) => {
+  const handleItemClick = (label) => { 
+      socket.emit('vendor-logout', vendorId);
+      socket.disconnect();
+  
     if (label === 'Logout') {
       localStorage.removeItem("token");
       window.location.reload();

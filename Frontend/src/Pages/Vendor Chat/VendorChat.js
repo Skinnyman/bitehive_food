@@ -6,7 +6,8 @@ import axios from "axios";
 
 let socket;
 
-const VendorChat = ({ vendorId }) => {
+const VendorChat = () => {
+  const vendorId = localStorage.getItem("id");
   const [conversations, setConversations] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
   const [text, setText] = useState("");
@@ -16,6 +17,7 @@ const VendorChat = ({ vendorId }) => {
   const messagesEndRef = useRef(null);
   const [originalData, setOriginalData] = useState({});
 
+  // Connect socket and handle incoming messages
   useEffect(() => {
     if (!vendorId) return;
 
@@ -26,15 +28,14 @@ const VendorChat = ({ vendorId }) => {
     socket.emit("registerUser", vendorId);
 
     const savedConversations = localStorage.getItem("conversation");
-
     if (savedConversations) {
-      const parsed = JSON.parse(savedConversations);
-      setConversations(parsed);
+      setConversations(JSON.parse(savedConversations));
     }
 
     socket.on("receiveMessage", (data) => {
       const { senderId, username, text } = data;
 
+      // Add to conversations if new client
       setConversations((prev) => {
         const exists = prev.find((c) => c.id === senderId);
         if (!exists) {
@@ -45,10 +46,12 @@ const VendorChat = ({ vendorId }) => {
         return prev;
       });
 
-      setNotifications((prev) => ({ ...prev, [senderId]: true }));
-
+      // If vendor is actively chatting with the client
       if (senderId === activeChat) {
         setMessages((prev) => [...prev, { sender: "client", text }]);
+      } else {
+        // Otherwise show a red notification dot
+        setNotifications((prev) => ({ ...prev, [senderId]: true }));
       }
     });
 
@@ -57,10 +60,12 @@ const VendorChat = ({ vendorId }) => {
     };
   }, [vendorId, activeChat]);
 
+  // Scroll to latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Load all messages from API for the selected chat
   const fetchMessages = (clientId) => {
     fetch(`${serverport}/api/messages/${clientId}/${vendorId}`)
       .then((res) => res.json())
@@ -74,6 +79,7 @@ const VendorChat = ({ vendorId }) => {
       .catch((err) => console.error("Failed to load messages", err));
   };
 
+  // Open selected chat
   const openChat = (clientId) => {
     if (clientId === activeChat) return;
     setActiveChat(clientId);
@@ -82,26 +88,35 @@ const VendorChat = ({ vendorId }) => {
     localStorage.setItem("activeChat", clientId);
     fetchMessages(clientId);
   };
-const userId = vendorId;
+
+  // Get vendor business name
   useEffect(() => {
-    axios.get(`${serverport}/api/vendor/business?userId=${userId}`)
+    axios
+      .get(`${serverport}/api/vendor/business?userId=${vendorId}`)
       .then((res) => {
-        // setFormData((prev) => ({ ...prev, ...res.data }));
         const data = res.data;
         setOriginalData(Array.isArray(data) ? data : [data]);
       })
       .catch((err) => console.log(err));
-  }, [userId]);
+  }, [vendorId]);
 
-
+  // Send message
   const handleSend = () => {
-    socket.emit("accept",{message:`New Message from ${originalData[0].businessName}vendor`,cusId:activeChat})
     if (text.trim() && activeChat) {
+      // Emit alert for client
+      socket.emit("accept", {
+        message: `New Message from ${originalData[0]?.businessName || "Vendor"}`,
+        cusId: activeChat,
+      });
+
+      // Emit message
       socket.emit("sendMessage", {
         senderId: vendorId,
         receiverId: activeChat,
         text,
       });
+
+      // Update UI immediately
       setMessages((prev) => [...prev, { sender: "vendor", text }]);
       setText("");
     }

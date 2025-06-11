@@ -36,6 +36,7 @@ const io = new Server(server,{
 let vendorSockets = {};
 let customerSockets = {};
 let onlineUsers = {};
+const onlineVendors = new Set();
 
 io.on("connection",(socket) => {
    //console.log(`User connected:${socket.id}`)
@@ -58,6 +59,12 @@ io.on("connection",(socket) => {
    
     onlineUsers[userId] = socket.id;
     console.log(`User ${userId} registered with socket ${socket.id}`);
+  });
+  // register user to be online
+  socket.on('vendor-online', (vendorId) => {
+    onlineVendors.add(vendorId);
+    console.log("This ",onlineVendors);
+    io.emit('update-online-vendors', Array.from(onlineVendors));
   });
   // Handle message sending
   socket.on("sendMessage",async ({ senderId, receiverId, text,username }) => {
@@ -122,6 +129,20 @@ socket.on("disconnect", () => {
       break;
     }
   }
+});
+socket.on('disconnect', () => {
+  // Remove vendor by socket ID if stored that way
+  onlineVendors.forEach((id) => {
+    if (socket.id === id) {
+      onlineVendors.delete(id);
+    }
+  });
+  io.emit('update-online-vendors', Array.from(onlineVendors));
+});
+socket.on('vendor-logout', (vendorId) => {
+  onlineVendors.delete(vendorId);
+  console.log(`Vendor ${vendorId} disconnected`);
+  io.emit('update-online-vendors', Array.from(onlineVendors));
 });
 
 

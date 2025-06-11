@@ -1,7 +1,8 @@
-const express = require("express")
-const Meal = require('../Models/meal')
+const express = require("express");
+const Meal = require('../Models/meal');
 const router = express.Router();
 const multer = require("multer");
+const Vendor = require("../Models/Vendor");
 
 
 const storage = multer.diskStorage(({
@@ -22,7 +23,10 @@ router.post('/addmeal', upload.single('image'), async (req, res) => {
     } catch (error) {
       parsedAccompaniment = []; // fallback
     }
-    const meal = await Meal.create({userId,name,image,mealType,price,chargeType,description,accompaniment: parsedAccompaniment});
+    const venMeal = await Vendor.find({userId});
+    const vendorName = venMeal[0].businessName;
+    console.log(vendorName)
+    const meal = await Meal.create({userId,name,image,mealType,price,chargeType,description,accompaniment: parsedAccompaniment,vendorName});
     res.status(201).json(meal);  
     //console.log(meal)
   });
@@ -43,6 +47,7 @@ router.post('/addmeal', upload.single('image'), async (req, res) => {
   })
   // get all meal to the client
   router.get('/allmeal', async (req,res)=> {
+ 
     try{
       const meal = await Meal.find();
       if (!meal) return res.status(404).json({ message: 'Meal not found' });

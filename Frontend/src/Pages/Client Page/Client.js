@@ -12,9 +12,25 @@ import DietPlanner from '../Diet Planner/DietPlanner';
 import io from "socket.io-client"
 import { serverport } from '../../Static/Variables';
 import { toast } from 'react-toastify';
-const socket =io(serverport) 
+import socket from '../../Static/Socket';
+// const socket =io(serverport) 
 
 function Client({ toggle, darkmode }) {
+const [onlineVendors, setOnlineVendors] = useState([]);
+
+useEffect(() => {
+  
+      socket.on('update-online-vendors', (onlineList) => {
+        //console.log("Received online vendors list:", onlineList); 
+        setOnlineVendors(onlineList);
+      });
+  
+      return () => {
+        socket.off('update-online-vendors');
+      };
+    },[socket]);
+    console.log("List",onlineVendors)
+  
 
   useEffect(() => {
           const userId = localStorage.getItem("id"); 
@@ -65,7 +81,7 @@ function Client({ toggle, darkmode }) {
       case 'Vendor':
         return (
           <div className="text-xl font-semibold p-4 text-black dark:text-white">
-            <VendorInfo/>
+            <VendorInfo onlineVendors={onlineVendors} />
           </div>
         );
       case 'Orders':

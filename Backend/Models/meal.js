@@ -35,6 +35,9 @@ const MealSchema = new mongoose.Schema({
 		default: "quantity",
         lowercase: true,
 	},
+	vendorName:{
+      type:String,
+	},
     accompaniment:{
         name: {
                 type: String,

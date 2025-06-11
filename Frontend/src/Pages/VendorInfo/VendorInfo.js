@@ -3,8 +3,10 @@ import VendorCard from '../../Components/VendorCard'
 import axios from 'axios';
 import { useOrder } from '../../context/OrderContext';
 import { serverport } from '../../Static/Variables';
+import socket from '../../Static/Socket';
 
-function VendorInfo() {
+
+function VendorInfo({onlineVendors}) {
 const { orders } = useOrder(); // <-- Changed here
   const [allbuss,setAllbuss] = useState([])
   
@@ -28,6 +30,15 @@ const { orders } = useOrder(); // <-- Changed here
   useEffect(()=>{
     fetchOrders()
   },[])
+
+  // const vendorId = onlineVendors;
+  // useEffect(()=>{
+    
+  //   if (vendorId) {
+  //     socket.emit("vendor-online", vendorId);
+  //   }
+   
+  // },[vendorId])
  
   return (
     
@@ -40,7 +51,8 @@ const { orders } = useOrder(); // <-- Changed here
 							?.toLowerCase()
 							.includes(orders.toLowerCase()) &&
         (
-         <VendorCard key={buss._id} buss={buss} 
+         
+         <VendorCard key={buss._id} buss={buss} isOnline={onlineVendors.includes(buss.userId?.toString())} 
          
           />
        )

@@ -8,7 +8,8 @@ import { motion } from "framer-motion";
 import { serverport } from '../Static/Variables';
 import io from "socket.io-client";
 import PickMap from './PickMap';
-const socket = io(serverport);
+import socket from '../Static/Socket';
+// const socket = io(serverport);
 
 
 function MealCard({toggle,darkmode}) {
@@ -34,7 +35,7 @@ function MealCard({toggle,darkmode}) {
     },
   });
 
-  const { orders } = useOrder(); // <-- Changed here
+  const { orders } = useOrder(); 
  // const {od,setOd} = useOd();
   //console.log(order)
   const userId = localStorage.getItem('id');
@@ -163,6 +164,7 @@ function MealCard({toggle,darkmode}) {
           </div>
           <div className="w-3/5 flex flex-col justify-between p-2">
             <div>
+                <h3>From: <span className='text-green-300'>{meal.vendorName?.substring(0, 14)}</span></h3>
               <div className="font-bold text-lg mb-1">{meal.name}</div>
               <div className={`text-sm text-gray-600 break-words whitespace-normal ${darkmode ? ' text-white h-16' : ''}`}>{meal.description}</div>
             </div>

@@ -5,9 +5,9 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 //import { useOrder } from '../context/OrderContext';
 import { serverport } from '../../Static/Variables';
-import io from "socket.io-client";
 import PickMap from '../../Components/PickMap';
-const socket = io(serverport);
+import socket from '../../Static/Socket';
+
 
 function VendorProf() {
   const username = localStorage.getItem('username');  
