@@ -19,6 +19,10 @@ const socket = io(serverport);
 
 
 function Vendor() {
+    const [conversations, setConversations] = useState([]);
+    const [activeChat, setActiveChat] = useState(null);
+    const [messages, setMessages] = useState([]);
+     const [notifications, setNotifications] = useState({});
   
     useEffect(() => {
         const vendorId = localStorage.getItem("id"); 
@@ -50,6 +54,48 @@ useEffect(()=>{
   }
  
 },[vendorId])
+
+  useEffect(() => {
+    if (!vendorId) return;
+
+
+    socket.emit("registerUser", vendorId);
+
+    const savedConversations = localStorage.getItem("conversation");
+    if (savedConversations) {
+      setConversations(JSON.parse(savedConversations));
+    }
+
+    socket.on("receiveMessage", (data) => {
+      const { senderId, username, text } = data;
+    
+
+      // Add to conversations if new client
+      setConversations((prev) => {
+        const exists = prev.find((c) => c.id === senderId);
+        if (!exists) {
+          const updated = [...prev, { id: senderId, username }];
+          localStorage.setItem("conversation", JSON.stringify(updated));
+          return updated;
+        }
+        return prev;
+      });
+
+      // If vendor is actively chatting with the client
+      if (senderId === activeChat) {
+        setMessages((prev) => [...prev, { sender: "client", text }]);
+      } else {
+        // Otherwise show a red notification dot
+        setNotifications((prev) => ({ ...prev, [senderId]: true }));
+      }
+    });
+
+    return () => {
+      socket.off("receiveMessage");
+    };
+  }, [vendorId, activeChat]);
+
+  console.log(conversations)
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [activePage, setActivePage] = useState('Profile');
@@ -78,7 +124,7 @@ useEffect(()=>{
       case 'Orders':
         return <div className="text-xl font-semibold p-4"><Order/></div>;
       case 'Chat':
-        return <div  className="text-xl font-semibold p-4"><VendorChat vendorId={vendorId}/></div>
+        return <div  className="text-xl font-semibold p-4"><VendorChat /></div>
       case 'Settings & Preferences':
         return <div className="text-xl font-semibold p-4"><h1>This is setting</h1></div>;
       case 'Support & Help':
@@ -91,10 +137,11 @@ useEffect(()=>{
   };
 
   const handleItemClick = (label) => { 
-      socket.emit('vendor-logout', vendorId);
-      socket.disconnect();
+     
   
     if (label === 'Logout') {
+      socket.emit('vendor-logout', vendorId);
+      socket.disconnect();
       localStorage.removeItem("token");
       window.location.reload();
       navigate('/login');
@@ -104,6 +151,7 @@ useEffect(()=>{
     }
   };
 
+  
   return (
     <div className="min-h-screen bg-white text-black dark:bg-black dark:text-white relative">
       {/* Mobile Hamburger */}

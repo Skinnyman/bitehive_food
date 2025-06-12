@@ -33,7 +33,7 @@ const VendorChat = () => {
     }
 
     socket.on("receiveMessage", (data) => {
-      const { senderId, username, text } = data;
+      const { senderId, username, text,time } = data;
 
       // Add to conversations if new client
       setConversations((prev) => {
@@ -48,7 +48,7 @@ const VendorChat = () => {
 
       // If vendor is actively chatting with the client
       if (senderId === activeChat) {
-        setMessages((prev) => [...prev, { sender: "client", text }]);
+        setMessages((prev) => [...prev, { sender: "client", text ,times:time}]);
       } else {
         // Otherwise show a red notification dot
         setNotifications((prev) => ({ ...prev, [senderId]: true }));
@@ -102,6 +102,7 @@ const VendorChat = () => {
 
   // Send message
   const handleSend = () => {
+    let time = (new Date(Date.now()).getHours() % 12 || 12) + ":" + (new Date(Date.now()).getMinutes() < 10 ? "0" : "") + new Date(Date.now()).getMinutes() + (new Date(Date.now()).getHours() >= 12 ? " pm" : " am");
     if (text.trim() && activeChat) {
       // Emit alert for client
       socket.emit("accept", {
@@ -114,10 +115,11 @@ const VendorChat = () => {
         senderId: vendorId,
         receiverId: activeChat,
         text,
+        time,
       });
 
       // Update UI immediately
-      setMessages((prev) => [...prev, { sender: "vendor", text }]);
+      setMessages((prev) => [...prev, { sender: "vendor", text,time }]);
       setText("");
     }
   };
@@ -207,7 +209,14 @@ const VendorChat = () => {
                     }`}
                   >
                     {msg.text}
+                    <div className="relative  text-right text-white">
+                         {msg.time}
+                    </div>
+                    <div className="relative  text-left text-white">
+                         {msg.times}
+                    </div>
                   </div>
+                 
                 ))}
                 <div ref={messagesEndRef} />
               </div>

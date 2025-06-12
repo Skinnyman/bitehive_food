@@ -31,14 +31,14 @@ const { orders } = useOrder(); // <-- Changed here
     fetchOrders()
   },[])
 
-  // const vendorId = onlineVendors;
-  // useEffect(()=>{
+  const vendorId = onlineVendors;
+  useEffect(()=>{
     
-  //   if (vendorId) {
-  //     socket.emit("vendor-online", vendorId);
-  //   }
+    if (vendorId) {
+      socket.emit("vendor-online", vendorId);
+    }
    
-  // },[vendorId])
+  },[vendorId])
  
   return (
     

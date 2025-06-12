@@ -67,14 +67,15 @@ io.on("connection",(socket) => {
     io.emit('update-online-vendors', Array.from(onlineVendors));
   });
   // Handle message sending
-  socket.on("sendMessage",async ({ senderId, receiverId, text,username }) => {
+  socket.on("sendMessage",async ({ senderId, receiverId, text,username,time }) => {
+  
     // save to database
-    const newMessage = new Message({ senderId, receiverId, text,username });
+    const newMessage = new Message({ senderId, receiverId, text,username,time });
     await newMessage.save();
     
     const receiverSocketId = onlineUsers[receiverId];
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit("receiveMessage", { senderId, text,username });
+      io.to(receiverSocketId).emit("receiveMessage", { senderId, text,username ,time});
       io.to(receiverSocketId).emit("newMessageNotification", { from: senderId });
     }
   });

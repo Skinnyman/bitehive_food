@@ -4,7 +4,9 @@ import { serverport } from "../Static/Variables";
 import io from "socket.io-client";
 import socket from "../Static/Socket";
 
+
 // const socket = io(serverport);
+
 
 const Chat = ({ vendorId }) => {
   const [messages, setMessages] = useState([]);
@@ -17,7 +19,7 @@ const Chat = ({ vendorId }) => {
     socket.emit("registerUser", userId);
 
     socket.on("receiveMessage", (data) => {
-      setMessages((prev) => [...prev, { sender: "vendor", text: data.text }]);
+      setMessages((prev) => [...prev, { sender: "vendor", text: data.text,times:data.time }]);
     });
 
     return () => {
@@ -31,6 +33,7 @@ const Chat = ({ vendorId }) => {
         .then((res) => res.json())
         .then((data) => {
           const formattedMessages = data.map((msg) => ({
+            time:msg.time,
             text: msg.text,
             sender: msg.senderId === userId ? "client" : "vendor", // map based on ID
           }));
@@ -45,6 +48,9 @@ const Chat = ({ vendorId }) => {
   }, [messages]);
 
   const handleSend = () => {
+   
+    let time = (new Date(Date.now()).getHours() % 12 || 12) + ":" + (new Date(Date.now()).getMinutes() < 10 ? "0" : "") + new Date(Date.now()).getMinutes() + (new Date(Date.now()).getHours() >= 12 ? " pm" : " am");
+
     socket.emit("place_order",{message:`New Message from ${username}`,vendorId:vendorId})
     if (text.trim()) {
       socket.emit("sendMessage", {
@@ -52,8 +58,9 @@ const Chat = ({ vendorId }) => {
         receiverId: vendorId,
         text,
         username,
+        time,
       });
-      setMessages((prev) => [...prev, { sender: "client", text }]);
+      setMessages((prev) => [...prev, { sender: "client", text ,time}]);
       setText("");
     }
   };
@@ -76,6 +83,12 @@ const Chat = ({ vendorId }) => {
             }`}
           >
             {msg.text}
+            <div className="relative  text-right text-white">
+                         {msg.time}
+             </div>
+            <div className="relative  text-left text-white">
+                         {msg.times}
+             </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
