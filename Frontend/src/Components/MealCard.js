@@ -24,6 +24,7 @@ function MealCard({toggle,darkmode}) {
   const [deliveryOption, setDeliveryOption] = useState("pickup");
   const [showMap, setShowMap] = useState(false);
   const [coords, setCoords] = useState([-1.6221, 6.923]);
+    const [ratings, setRatings] = useState({ averageRating: 0 });
   const [formdata, setFormdata] = useState({
     userId:"",
     clientName: "",
@@ -51,6 +52,29 @@ function MealCard({toggle,darkmode}) {
         setMeals([]);
       });
   }, []);
+
+// meals.forEach(meal => {
+//    console.log(meal._id);
+// });
+
+
+
+useEffect(() => {
+  if (meals.length === 0) return;
+
+  meals.forEach(meal => {
+    axios
+      .get(`${serverport}/api/order/ratemeal?mealId=${meal._id}`)
+      .then(res => {
+        setRatings(prev => ({
+          ...prev,
+          [meal._id]: res.data.averageRating
+        }));
+      })
+      .catch(console.error);
+  });
+}, [meals]);
+    console.log(ratings)
 
 
   const handleOrderClick = (meal) => {
@@ -136,7 +160,7 @@ function MealCard({toggle,darkmode}) {
     setShowModal(false);
     
   };
-//console.log(accompanimentsName)
+// console.log(meals)
 
 
   return (
@@ -152,7 +176,8 @@ function MealCard({toggle,darkmode}) {
 							?.toLowerCase()
 							.includes(orders.toLowerCase()) &&
          (
-        <div key={meal._id} className={`${darkmode ? 'bg-gray-800 text-white h-16' : ''}border w-[350px] h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center bg-white relative right-10`}>
+          
+        <div key={meal._id} className={`${darkmode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}border w-[350px] h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center relative right-10`}>
           <div className="w-2/5 flex justify-center items-center">
             <div className="h-36 w-36 bg-slate-400 rounded-xl overflow-hidden">
               <img
@@ -164,12 +189,12 @@ function MealCard({toggle,darkmode}) {
           </div>
           <div className="w-3/5 flex flex-col justify-between p-2">
             <div>
-                <h3>From: <span className='text-green-300'>{meal.vendorName?.substring(0, 14)}</span></h3>
-              <div className="font-bold text-lg mb-1">{meal.name}</div>
-              <div className={`text-sm text-gray-600 break-words whitespace-normal ${darkmode ? ' text-white h-16' : ''}`}>{meal.description}</div>
+                <h3 className={`text-green-300 ${darkmode ? ' text-white ' : ''}`}>From: <span className={`text-green-300 ${darkmode ? ' text-white ' : ''}`}>{meal.vendorName?.substring(0, 14)}</span></h3>
+              <div className={`font-bold text-lg mb-1 ${darkmode ? ' text-white' : ''}`}>{meal.name}</div>
+              <div className={`text-sm text-gray-600 break-words whitespace-normal ${darkmode ? ' text-white' : ''}`}>{meal.description}</div>
             </div>
             <div className="flex flex-row justify-between items-center mt-2">
-              <div className="text-xl font-bold">₵ {meal.price}</div>
+              <div className={`text-xl font-bold ${darkmode ? ' text-white ' : ''}`}>₵ {meal.price}</div>
             </div>
             <div className="flex flex-row justify-between items-center mt-2">
               <div className="w-14 h-8 bg-slate-900 text-white flex items-center justify-center rounded-lg text-sm font-bold">
@@ -177,7 +202,7 @@ function MealCard({toggle,darkmode}) {
               </div>
               <div className="w-[30%] h-8 bg-slate-900 text-white flex items-center justify-center rounded-lg text-sm font-bold">
                 <FaStar className="text-yellow-500 mr-1" />
-                3
+                {ratings[meal._id] !== undefined ? ratings[meal._id].toFixed(1) : '...'}
               </div>
               <div
                 onClick={() => handleOrderClick(meal)}

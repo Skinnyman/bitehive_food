@@ -10,7 +10,6 @@ require("dotenv").config();
 const storage = multerS3({
   s3: s3,
   bucket: process.env.BUCKETNAME, 
-  // acl: 'public-read', // Allows public URL access
   metadata: (req, file, cb) => {
     cb(null, { fieldName: file.fieldname });
   },

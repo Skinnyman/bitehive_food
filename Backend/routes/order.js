@@ -175,11 +175,55 @@ router.patch("/status/:id", async(req,res)=>{
         res.json({message:"Error updating order status"});
     }
 })
+
+// Getting average rating
 router.get('/rating',async(req,res)=> {
   const { userId } = req.query;
 
   try {
     const meals = await orderedMeal.find({ userId, rating: { $exists: true } });
+
+    const ratingsCount = {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4-5": 0
+    };
+
+    let totalRating = 0;
+
+    meals.forEach((meal) => {
+      const rating = meal.rating;
+      totalRating += rating;
+      if (rating >= 4) {
+        ratingsCount["4-5"]++;
+      } else if (rating === 3) {
+        ratingsCount["3"] = (ratingsCount["3"] || 0) + 1;
+      } else if (rating === 2) {
+        ratingsCount["2"] = (ratingsCount["2"] || 0) + 1;
+      } else if (rating === 1) {
+        ratingsCount["1"] = (ratingsCount["1"] || 0) + 1;
+      }
+     
+    });
+
+    const average = meals.length > 0 ? (totalRating / meals.length).toFixed(1) : 0;
+
+    res.json({
+      ratingSummary: ratingsCount,
+      averageRating: parseFloat(average)
+    });
+    
+
+  }catch(err){
+    res.json({message:"Error getting rating"});
+  }
+})
+router.get('/ratemeal',async(req,res)=> {
+  const { mealId } = req.query;
+
+  try {
+    const meals = await orderedMeal.find({ mealId, rating: { $exists: true } });
 
     const ratingsCount = {
       "1": 0,
