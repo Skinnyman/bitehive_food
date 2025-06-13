@@ -18,6 +18,8 @@ import socket from '../../Static/Socket';
 function Client({ toggle, darkmode }) {
 const [onlineVendors, setOnlineVendors] = useState([]);
 
+
+
 useEffect(() => {
   
       socket.on('update-online-vendors', (onlineList) => {
@@ -29,7 +31,7 @@ useEffect(() => {
         socket.off('update-online-vendors');
       };
     },[socket]);
-    console.log("List",onlineVendors)
+    // console.log("List",onlineVendors)
   
 
   useEffect(() => {

@@ -100,6 +100,7 @@ const Product = () => {
       console.error('Delete failed:', err);
     }
   };
+  console.log(meal)
 
   return (
     <div className="p-4 sm:p-6 bg-[#f4faff] min-h-screen space-y-6">
@@ -283,7 +284,7 @@ const Product = () => {
               className="rounded-2xl shadow-md overflow-hidden bg-white flex flex-col"
             >
               <img
-                src={`${serverport}/${meal.image}`}
+                src={`${meal.image}`}
                 alt={meal.name}
                 className="h-40 w-full object-cover"
               />

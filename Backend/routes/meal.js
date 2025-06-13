@@ -3,19 +3,29 @@ const Meal = require('../Models/meal');
 const router = express.Router();
 const multer = require("multer");
 const Vendor = require("../Models/Vendor");
+const multerS3 = require('multer-s3');
+const s3 = require("../s3Config");
+require("dotenv").config();
 
+const storage = multerS3({
+  s3: s3,
+  bucket: process.env.BUCKETNAME, 
+  // acl: 'public-read', // Allows public URL access
+  metadata: (req, file, cb) => {
+    cb(null, { fieldName: file.fieldname });
+  },
+  key: (req, file, cb) => {
+    cb(null, Date.now().toString() + '-' + file.originalname);
+  }
+});
 
-const storage = multer.diskStorage(({
-    destination:(req,file,cb) => cb(null,'uploads/'),
-    filename: (req,file,cb) => cb(null,Date.now() + '-' + file.originalname),
-}));
 
 const upload = multer({ storage});
 
 // adding product 
 router.post('/addmeal', upload.single('image'), async (req, res) => {
     const{userId,name,mealType,price,chargeType,description,accompaniment}= req.body;
-    const image = req.file ? req.file.path : '';
+    const image = req.file ? req.file.location : '';
     // Parse accompaniment if it's a JSON string
     let parsedAccompaniment;
     try {
@@ -25,7 +35,7 @@ router.post('/addmeal', upload.single('image'), async (req, res) => {
     }
     const venMeal = await Vendor.find({userId});
     const vendorName = venMeal[0].businessName;
-    console.log(vendorName)
+
     const meal = await Meal.create({userId,name,image,mealType,price,chargeType,description,accompaniment: parsedAccompaniment,vendorName});
     res.status(201).json(meal);  
     //console.log(meal)

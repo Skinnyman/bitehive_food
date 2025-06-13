@@ -156,7 +156,7 @@ function MealCard({toggle,darkmode}) {
           <div className="w-2/5 flex justify-center items-center">
             <div className="h-36 w-36 bg-slate-400 rounded-xl overflow-hidden">
               <img
-                src={`${serverport}/${meal.image}`}
+                src={`${meal.image}`}
                 alt={meal.name}
                 className="h-full w-full object-cover rounded-xl"
               />
@@ -200,7 +200,7 @@ function MealCard({toggle,darkmode}) {
             <div className="flex flex-col items-center px-2">
               <div className="w-full h-40 border">
                 <img
-                  src={`${serverport}/${selectedMeal.image}`}
+                  src={`${selectedMeal.image}`}
                   alt={selectedMeal.name}
                   className="h-full w-full object-cover"
                 />

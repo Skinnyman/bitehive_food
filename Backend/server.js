@@ -9,6 +9,8 @@ const Message = require("./Models/message");
 require("./services/db");
 
 require('dotenv').config();
+
+
 const authRoutes = require("./routes/auth");
 const vendorRoutes = require("./routes/vendor")
 const mealRoutes = require("./routes/meal")
