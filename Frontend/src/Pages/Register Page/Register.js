@@ -7,6 +7,7 @@ import { serverport } from '../../Static/Variables';
 
 function Register({darkmode,toggle}) {
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
    
   const [formData,setformData] = useState({username:"",email:"",password:"" ,confirmPassword:"",role:"customer"});
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ function Register({darkmode,toggle}) {
 
        return
     }
-
+    setLoading(true);
    try{
         const response = await axios.post(`${serverport}/api/auth/register`, formData);
        // navigate("/login");
@@ -112,9 +113,41 @@ function Register({darkmode,toggle}) {
                               <option value="customer">Customer</option>
                               <option value="vendor">Vendor</option>
                             </select>
-                            <button type='submit' className="relative top-4 w-full py-2 text-black bg-yellow-400 rounded-full font-bold hover:bg-yellow-500 transition">
-                              Sign Up
-                            </button>
+                            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-2 text-white rounded-md font-bold transition flex justify-center items-center gap-2
+                ${loading ? 'bg-yellow-300 cursor-not-allowed' : 'bg-yellow-400 hover:bg-yellow-500'}
+              `}
+            >
+              {loading ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    ></path>
+                  </svg>
+                  Signing Up...
+                </>
+              ) : (
+                "Sign Up"
+              )}
+            </button>
               </form>
               
               {error && <p className='text-red-600'>{error}</p>}
