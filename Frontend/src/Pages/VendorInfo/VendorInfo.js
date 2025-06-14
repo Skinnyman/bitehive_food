@@ -6,10 +6,10 @@ import { serverport } from '../../Static/Variables';
 import socket from '../../Static/Socket';
 
 
-function VendorInfo({onlineVendors}) {
+function VendorInfo({onlineVendors,to}) {
 const { orders } = useOrder(); // <-- Changed here
-  const [allbuss,setAllbuss] = useState([])
-  
+const [allbuss,setAllbuss] = useState([])
+
   const fetchOrders = async()=>{
     axios.get(`${serverport}/api/vendor/allbusiness`)
     .then((res) => {

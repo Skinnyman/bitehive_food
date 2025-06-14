@@ -45,7 +45,7 @@ const handleLogout = () => {
           {/* Logo */}
           <div className="flex items-center gap-4">
             <Link
-              to={'/'}
+              to={''}
               className="relative left-5 md:left-0 text-3xl font-bold text-accent-500  "
             >
               BiteHive

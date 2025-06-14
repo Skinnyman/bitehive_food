@@ -18,7 +18,7 @@ function PropValue({ property, value }) {
   );
 }
 
-function VendorCard({ buss, isOnline }) {
+function VendorCard({ buss, isOnline  }) {
 
   const [isFav, setIsFav] = useState(false);
   const vendorId = buss.userId;
@@ -68,7 +68,7 @@ function VendorCard({ buss, isOnline }) {
 
   return (
     <motion.div
-      className="w-full max-w-md sm:w-[350px] p-3 sm:p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg bg-white hover:bg-blue-50 transition duration-300 ease-in-out mx-auto my-4"
+      className={`w-full max-w-md sm:w-[350px] p-3 sm:p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg bg-white hover:bg-blue-50 transition duration-300 ease-in-out mx-auto my-4 relative top-14`}
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}

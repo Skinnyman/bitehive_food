@@ -9,14 +9,13 @@ import Meal from "../Meal Page/Meal"
 import Order from "../Order Page/Order"
 import VendorInfo from '../VendorInfo/VendorInfo';
 import DietPlanner from '../Diet Planner/DietPlanner';
-import io from "socket.io-client"
-import { serverport } from '../../Static/Variables';
 import { toast } from 'react-toastify';
 import socket from '../../Static/Socket';
 // const socket =io(serverport) 
 
 function Client({ toggle, darkmode }) {
 const [onlineVendors, setOnlineVendors] = useState([]);
+const [to,setTo] = useState("");
 
 
 
@@ -41,6 +40,7 @@ useEffect(() => {
           }
           socket.on('accept', (data) => {
            // alert(data.message);
+           setTo(data.message)
             toast.success(data.message,{
               position:"top-right",
               autoClose:9000,
@@ -54,6 +54,7 @@ useEffect(() => {
           };
         
         });
+     
   const isLoggedIn = !!localStorage.getItem("token");
 
 
@@ -76,14 +77,15 @@ useEffect(() => {
     switch (activePage) {
       case 'Meals':
         return (
-          <div className="text-xl font-semibold p-4 text-black dark:text-white">
-           <Meal  darkmode={darkmode} toggle={toggle}/>
-          </div>
+          <div className="text-xl font-semibold p-4 text-black dark:text-white w-full">
+          <Meal darkmode={darkmode} toggle={toggle} />
+        </div>
+        
         );
       case 'Vendor':
         return (
           <div className="text-xl font-semibold p-4 text-black dark:text-white">
-            <VendorInfo onlineVendors={onlineVendors} />
+            <VendorInfo onlineVendors={onlineVendors} to={to} />
           </div>
         );
       case 'Orders':
@@ -111,16 +113,16 @@ useEffect(() => {
         {/* Hamburger Icon */}
         <div className={`md:hidden fixed top-4 left-1 z-50`}>
           <button onClick={handleHamburgerClick}>
-            <Bars3Icon className={`h-8 w-8 text-gray-700 dark:text-white ${darkmode ? 'bg-white ' : ''}`} />
+            <Bars3Icon className={`h-8 w-8 text-gray-700 dark:text-white ${darkmode ? ' text-white' : ''}`} />
           </button>
         </div>
 
         {/* Mobile Sidebar */}
         {isOpen && (
-          <aside className="md:hidden fixed top-0 left-0 w-64 h-full bg-gray-100 dark:bg-gray-900 p-4 z-50 shadow-lg">
+          <aside className={`md:hidden fixed top-0 left-0 w-64 h-full bg-gray-100 dark:bg-gray-900 p-4 z-50 shadow-lg ${darkmode ? ' text-white bg-gray-950' : ''}`}>
             <div className="flex justify-end mb-4">
               <button onClick={handleHamburgerClick}>
-                <XMarkIcon className="h-6 w-6 text-gray-700 dark:text-white" />
+                <XMarkIcon className={`h-6 w-6 text-gray-700 dark:text-white ${darkmode ? ' text-white' : ''}`}/>
               </button>
             </div>
             <ul className="space-y-4 mt-8">
@@ -152,7 +154,7 @@ useEffect(() => {
 
         <div className="flex pt-16">
           {/* Desktop Sidebar */}
-          <aside className="hidden md:block w-60 bg-gray-100 dark:bg-gray-900 p-4 fixed top-16 left-0 h-full">
+          <aside className={`hidden md:block w-60 bg-gray-100 dark:bg-gray-900 p-4 fixed top-16 left-0 h-full ${darkmode ? 'bg-gray-950 text-white' : ''}`}>
             <ul className="space-y-4 mt-8">
               {menuItems.map((item) => (
                 <li
@@ -172,10 +174,15 @@ useEffect(() => {
           </aside>
 
           {/* Main Content */}
-          <main className={`${darkmode ? 'bg-white text-white h-full' : ''}ml-0 md:ml-60 w-full px-4 pt-24 relative top-24  min-h-[128vh]`}>
-            {renderContent()}
-          
-          </main>
+          <main
+  className={`ml-0 md:ml-60 w-full px-4 min-h-screen ${
+    darkmode ? 'bg-gray-950 text-white' : 'bg-white text-black'
+  } pt-[7rem] md:pt-[6rem]`}
+>
+  {renderContent()}
+</main>
+
+
         </div>
       </div>
     </div>
