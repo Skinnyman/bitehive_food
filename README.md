@@ -11,6 +11,7 @@ BiteHive is a full-stack food ordering and vendor management platform, where use
 * **Backend:** Node.js, Express
 * **Database:** MongoDB
 * **Authentication:** JWT
+* **Image storing:** AWS S3 
 
 ---
 
@@ -38,6 +39,11 @@ npm install
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/bitehive
 JWT_SECRET=your_jwt_secret
+FRONTEND=your frontend port
+BUCKETNAME=your bucket name
+REGION=your region
+AWS_ACCESS_KEY_ID=your aws access key
+AWS_SECRET_ACCESS_KEY=your aws secret access
 ```
 
 Then run the backend:
@@ -58,7 +64,8 @@ npm install
 #### Create a `.env` file in the `frontend` directory:
 
 ```env
-REACT_APP_SERVER_PORT=http://localhost:5000
+REACT_APP_SERVER_PORT=your backend port 
+REACT_APP_TOKEN=your token
 ```
 
 Then run the frontend:
@@ -77,13 +84,17 @@ bitehive/
 ├── backend/
 │   ├── models/
 │   ├── routes/
-│   ├── controllers/
+│   ├── services/
+|   ├── s3Config/
 │   └── server.js
 │
 ├── frontend/
 │   ├── src/
+│   │   ├── Assets/
 │   │   ├── components/
+│   │   ├── context/
 │   │   ├── pages/
+│   │   ├── Static/
 │   │   └── App.js
 ```
 
@@ -96,7 +107,13 @@ bitehive/
 | `PORT`                  | Backend  | Port the server runs on           |
 | `MONGO_URI`             | Backend  | MongoDB connection URI            |
 | `JWT_SECRET`            | Backend  | Secret key for JWT authentication |
+| `FRONTEND`            | Backend  | Port the frontend is running on |
+| `BUCKETNAME`            | Backend  | The name of your bucket in aws S3 |
+| `REGION`            | Backend  | name of your region in aws s3 bucket |
+| `AWS_ACCESS_KEY_ID` | Backend |Your access key    |
+| `AWS_SECRET_ACCESS_KEY` | Backend | Your secret key  |
 | `REACT_APP_SERVER_PORT` | Frontend | Server base URL for API requests  |
+| `REACT_APP_TOKEN` | Frontend | Your token from mapbox gl  |
 
 ---
 
