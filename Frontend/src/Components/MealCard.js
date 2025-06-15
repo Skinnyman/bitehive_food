@@ -189,7 +189,7 @@ useEffect(() => {
           </div>
           <div className="w-3/5 flex flex-col justify-between p-2">
             <div>
-                <h3 className={`text-black ${darkmode ? ' text-white ' : ''}`}>From: <span className={`text-black font-bold ${darkmode ? ' text-white ' : ''}`}>{meal.vendorName?.substring(0, 14)}</span></h3>
+                <h3 className={`text-black ${darkmode ? ' text-white ' : ''}`}>From: <span className={`text-black font-bold ${darkmode ? ' text-white ' : ''}`}>{meal.vendorName}</span></h3>
               <div className={`font-bold text-lg mb-1 ${darkmode ? ' text-white' : ''}`}>{meal.name}</div>
               <div className={`text-sm text-gray-600 break-words whitespace-normal ${darkmode ? ' text-white' : ''}`}>{meal.description}</div>
             </div>
