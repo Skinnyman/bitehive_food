@@ -164,7 +164,7 @@ useEffect(() => {
 
   return (
     <motion.div 
-    className={`grid grid-cols-1 md:grid-cols-2 gap-10 p-6 relative top-32`}
+    className={`grid grid-cols-1 md:grid-cols-2 gap-10 p-6 relative top-32 `}
     initial={{ opacity: 0, y: 40 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{duration:0.5}}
@@ -177,7 +177,7 @@ useEffect(() => {
 							.includes(orders.toLowerCase()) &&
          (
           
-        <div key={meal._id} className={`${darkmode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}border w-[350px] h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center relative right-10`}>
+        <div key={meal._id} className={`${darkmode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}border-2 border-gray-950 w-[350px] min-h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center relative right-10`}>
           <div className="w-2/5 flex justify-center items-center">
             <div className="h-36 w-36 bg-slate-400 rounded-xl overflow-hidden">
               <img
@@ -189,7 +189,7 @@ useEffect(() => {
           </div>
           <div className="w-3/5 flex flex-col justify-between p-2">
             <div>
-                <h3 className={`text-green-300 ${darkmode ? ' text-white ' : ''}`}>From: <span className={`text-green-300 ${darkmode ? ' text-white ' : ''}`}>{meal.vendorName?.substring(0, 14)}</span></h3>
+                <h3 className={`text-black ${darkmode ? ' text-white ' : ''}`}>From: <span className={`text-black font-bold ${darkmode ? ' text-white ' : ''}`}>{meal.vendorName?.substring(0, 14)}</span></h3>
               <div className={`font-bold text-lg mb-1 ${darkmode ? ' text-white' : ''}`}>{meal.name}</div>
               <div className={`text-sm text-gray-600 break-words whitespace-normal ${darkmode ? ' text-white' : ''}`}>{meal.description}</div>
             </div>
