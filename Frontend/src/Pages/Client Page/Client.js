@@ -113,7 +113,7 @@ useEffect(() => {
         {/* Hamburger Icon */}
         <div className={`md:hidden fixed top-4 left-1 z-50`}>
           <button onClick={handleHamburgerClick}>
-            <Bars3Icon className={`h-8 w-8 text-gray-700 dark:text-white ${darkmode ? ' text-white' : ''}`} />
+            <Bars3Icon className={`h-8 w-8 text-gray-700 dark:text-black ${darkmode ? ' text-white' : ''}`} />
           </button>
         </div>
 

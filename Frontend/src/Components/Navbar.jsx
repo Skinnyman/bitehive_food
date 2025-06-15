@@ -57,7 +57,7 @@ const handleLogout = () => {
             <input
               type="text"
               value={searchTerm}
-              placeholder="Search for meals"
+              placeholder="Search for Meals"
               onChange={(e)=> setSearchTerm(e.target.value)}
               className={`flex-grow px-2 py-1 outline-none text-sm  ${
                 darkmode ? 'bg-black' : 'bg-gray-100'

@@ -66,7 +66,7 @@ function Register({darkmode,toggle}) {
                       className="w-full h-full object-cover rounded-sm shadow-md"
                     />
                   </div>
-             {/* Login Form */}
+             {/* Register Form */}
              <div className="border rounded-sm shadow-lg p-10 w-full max-w-md bg-white space-y-6 ">
               <h1 className="text-3xl text-center font-bold text-yellow-300">Register</h1>
               <form onSubmit={handleSubmit}>

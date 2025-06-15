@@ -164,7 +164,7 @@ useEffect(() => {
 
   return (
     <motion.div 
-    className={`grid grid-cols-1 md:grid-cols-2 gap-10 p-6 relative top-16`}
+    className={`grid grid-cols-1 md:grid-cols-2 gap-10 p-6 relative top-32`}
     initial={{ opacity: 0, y: 40 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{duration:0.5}}

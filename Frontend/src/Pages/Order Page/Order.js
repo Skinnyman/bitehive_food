@@ -65,7 +65,7 @@ function Order() {
   }, []);
 
   return (
-    <div className='relative bottom-28 grid grid-cols-1 md:grid-cols-2 gap-10 p-6'>
+    <div className='grid grid-cols-1 md:grid-cols-2 gap-10 p-6'>
       {allOrders.length === 0 ? (
         <div className='text-center text-gray-500 col-span-2'>No orders available</div>
       ) : (
