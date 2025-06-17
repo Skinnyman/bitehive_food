@@ -10,6 +10,11 @@ function Login({ darkmode, toggle }) {
   const [loading, setLoading] = useState(false); // <-- Loading state
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const [showPassword,setShowPassword] = useState(false);
+
+const togglePassword = ()=>{
+  setShowPassword((prev) => !prev);
+}
 
   const handleChange = async (e) => {
     e.preventDefault();
@@ -35,13 +40,14 @@ function Login({ darkmode, toggle }) {
         }
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.error || "Invalid credentials.";
+      const errorMsg = err.response?.data?.error || "Network Issue";
       console.error("login failed:", errorMsg);
       setError(errorMsg);
     } finally {
       setLoading(false); // Stop loading
     }
   };
+
 
   return (
     <div>
@@ -75,14 +81,21 @@ function Login({ darkmode, toggle }) {
             <div>
               <label className="block text-yellow-500 font-semibold mb-1">Password</label>
               <input
-                type="password"
+                type={showPassword ? 'text': 'password'}
                 placeholder="Enter password..."
                 required
                 onChange={(e) => setformData({ ...formData, password: e.target.value })}
                 className="w-full p-2 border-b-2 outline-none focus:border-yellow-400 text-gray-700 hover:border-b-yellow-500"
               />
             </div>
-
+             <label className='flex items-center gap-2 '>
+               <input
+                 type='checkbox'
+                 checked={showPassword}
+                 onChange={togglePassword}  
+               />
+               Show Password
+             </label>
             <button
               type="submit"
               disabled={loading}

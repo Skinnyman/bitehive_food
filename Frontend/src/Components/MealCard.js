@@ -62,18 +62,24 @@ function MealCard({toggle,darkmode}) {
 useEffect(() => {
   if (meals.length === 0) return;
 
-  meals.forEach(meal => {
-    axios
-      .get(`${serverport}/api/order/ratemeal?mealId=${meal._id}`)
-      .then(res => {
+  const fetchRatings = async () => {
+    for (const meal of meals) {
+      try {
+        const res = await axios.get(`${serverport}/api/order/ratemeal?mealId=${meal._id}`);
         setRatings(prev => ({
           ...prev,
           [meal._id]: res.data.averageRating
         }));
-      })
-      .catch(console.error);
-  });
+      } catch (error) {
+        console.error(`Error fetching rating for meal ${meal._id}:`, error);
+      }
+    }
+  };
+
+  fetchRatings();
 }, [meals]);
+
+// console.log(ratings)
    
 
   const handleOrderClick = (meal) => {

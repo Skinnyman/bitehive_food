@@ -224,6 +224,7 @@ router.get('/ratemeal',async(req,res)=> {
 
   try {
     const meals = await orderedMeal.find({ mealId, rating: { $exists: true } });
+ 
 
     const ratingsCount = {
       "1": 0,
@@ -233,9 +234,11 @@ router.get('/ratemeal',async(req,res)=> {
     };
 
     let totalRating = 0;
+   
 
     meals.forEach((meal) => {
       const rating = meal.rating;
+     
       totalRating += rating;
       if (rating >= 4) {
         ratingsCount["4-5"]++;
@@ -250,11 +253,15 @@ router.get('/ratemeal',async(req,res)=> {
     });
 
     const average = meals.length > 0 ? (totalRating / meals.length).toFixed(1) : 0;
-
+  
     res.json({
       ratingSummary: ratingsCount,
       averageRating: parseFloat(average)
     });
+  
+    // console.log("Matched meals:", meals.map(m => ({ _id: m._id, mealId: m.mealId, rating: m.rating })));
+
+  
     
 
   }catch(err){
