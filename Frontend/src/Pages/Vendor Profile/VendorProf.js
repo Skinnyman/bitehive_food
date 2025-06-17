@@ -20,6 +20,7 @@ function VendorProf() {
   const [deliveryOption, setDeliveryOption] = useState("pickup");
   const [showMap, setShowMap] = useState(false);
 const [coords, setCoords] = useState([-1.6221, 6.923]);
+ const [ratings, setRatings] = useState({ averageRating: 0 });
 const [formdata, setFormdata] = useState({
       userId:"",
       clientName: "",
@@ -122,7 +123,25 @@ const [formdata, setFormdata] = useState({
     }
     setShowModal(false);
   };
+useEffect(() => {
+  if (meals.length === 0) return;
 
+  const fetchRatings = async () => {
+    for (const meal of meals) {
+      try {
+        const res = await axios.get(`${serverport}/api/order/ratemeal?mealId=${meal._id}`);
+        setRatings(prev => ({
+          ...prev,
+          [meal._id]: res.data.averageRating
+        }));
+      } catch (error) {
+        console.error(`Error fetching rating for meal ${meal._id}:`, error);
+      }
+    }
+  };
+
+  fetchRatings();
+}, [meals]);
  // console.log(meals)
 
 
@@ -132,7 +151,7 @@ const [formdata, setFormdata] = useState({
          <div>No Vendor meals available</div>
         )  : (
       meals.map((meal) => (
-        <div key={meal._id} className="border w-[350px] h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center bg-white">
+        <div key={meal._id} className="border w-[350px] min-h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center bg-white">
           <div className="w-2/5 flex justify-center items-center">
             <div className="h-36 w-36 bg-slate-400 rounded-xl overflow-hidden">
               <img
@@ -156,7 +175,7 @@ const [formdata, setFormdata] = useState({
               </div>
               <div className="w-[30%] h-8 bg-slate-900 text-white flex items-center justify-center rounded-lg text-sm font-bold">
                 <FaStar className="text-yellow-500 mr-1" />
-                3
+                {ratings[meal._id] !== undefined ? ratings[meal._id].toFixed(1) : '...'}
               </div>
               <div
                 onClick={() => handleOrderClick(meal)}

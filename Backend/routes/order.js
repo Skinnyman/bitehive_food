@@ -223,7 +223,7 @@ router.get('/ratemeal',async(req,res)=> {
   const { mealId } = req.query;
 
   try {
-    const meals = await orderedMeal.find({ mealId, rating: { $exists: true } });
+    const meals = await orderedMeal.find({ mealId, rating: { $gt: 0 } });
  
 
     const ratingsCount = {
