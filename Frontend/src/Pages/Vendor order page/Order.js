@@ -4,6 +4,7 @@ import { IoStarSharp } from "react-icons/io5";
 import axios from "axios";
 import { serverport } from "../../Static/Variables";
 import PickMap from "../../Components/PickMap";
+import { jsPDF } from "jspdf";
 import io from "socket.io-client";
 const socket = io(serverport)
 
@@ -82,6 +83,34 @@ function Order() {
       }
     );
   };
+// to download laction details into pdf
+  const handleShareLocationPDF = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+  
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+  
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text("Delivery Location", 20, 20);
+        doc.setFontSize(12);
+        doc.text(`Latitude: ${latitude}`, 20, 40);
+        doc.text(`Longitude: ${longitude}`, 20, 50);
+  
+        doc.save("delivery_location.pdf");
+      },
+      (error) => {
+        console.error("Error fetching location:", error);
+        alert("Failed to get your location.");
+      }
+    );
+  };
+  
 
   const senddata = async (orderId) => {
     try {
@@ -259,7 +288,9 @@ function Order() {
                     <span>Submit Delivery Info</span>
                   </div>
 
-                  <div className="flex cursor-pointer flex-row items-center border px-3 py-3 mt-2 hover:bg-green-200 rounded">
+                  <div className="flex cursor-pointer flex-row items-center border px-3 py-3 mt-2 hover:bg-green-200 rounded"
+                    onClick={handleShareLocationPDF}
+                  >
                     <MdOutlineShare className={`text-green-500 mr-2`} size={22} />
                     <span>Share Delivery Location</span>
                   </div>
