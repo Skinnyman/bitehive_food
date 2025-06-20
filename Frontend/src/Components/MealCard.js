@@ -183,7 +183,7 @@ useEffect(() => {
 							.includes(orders.toLowerCase()) &&
          (
           
-        <div key={meal._id} className={`${darkmode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}border-2 border-gray-950 w-[350px] min-h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center relative right-10`}>
+        <div key={meal._id} className={`${darkmode ? 'bg-gray-900 text-white' : 'bg-gray-200 text-gray-900'} w-[350px] min-h-52 rounded-xl shadow-md hover:shadow-xl flex flex-row items-center relative right-10`}>
           <div className="w-2/5 flex justify-center items-center">
             <div className="h-36 w-36 bg-slate-400 rounded-xl overflow-hidden">
               <img
