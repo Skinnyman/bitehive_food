@@ -32,7 +32,7 @@ cusId:{
 },
 status: {
     type: String,
-    enum: ["pending","accepted","cancelled","completed","search","finished"],
+    enum: ["pending","accepted","cancelled","completed","search","finished","pay"],
     default: "pending"
 },
 accompanimentsName:{

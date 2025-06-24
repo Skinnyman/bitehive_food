@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MdOutlineDone, MdCancel } from "react-icons/md";
 import { IoStarSharp } from "react-icons/io5";
 import axios from "axios";
@@ -8,6 +8,7 @@ import PickMap from "./PickMap";
 import { toast } from "react-toastify";
 import io from "socket.io-client";
 import socket from "../Static/Socket";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 // const socket = io(serverport)
 
@@ -22,6 +23,9 @@ function OrderInformation({ order, fetchOrders, info }) {
   const [latitude, setlatitude] = useState("");
   const[phone,setPhone] = useState("");
   const [venName,setvenName] = useState("");
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const hasVerified = useRef(false);
 
   const handleCancel = async () => {
     socket.emit("place_order",{message:`order cancelled from ${username}`,vendorId:order.userId})
@@ -85,6 +89,94 @@ function OrderInformation({ order, fetchOrders, info }) {
     fetchOrders();
   };
 
+  // const handleOrder = async (orderId, vendorId) => {
+  //   try {
+  //     // ✅ Integrate Paystack popup or logic here
+  //     // Assume Paystack payment was successful
+
+  //     // Now update order status to completed
+  //     await axios.patch(`${serverport}/api/order/status/${orderId}`, {
+  //       status: "pay",
+  //     });
+
+  //     // Notify vendor (optional)
+  //     socket.emit("place_order", {
+  //       message: `Order completed by ${username}`,
+  //       vendorId: vendorId,
+  //     });
+
+  //     toast.success("Payment successful! Order marked as completed.");
+
+  //     // Refresh orders
+  //     fetchOrders();
+  //   } catch (err) {
+  //     toast.error("Payment failed or cancelled.");
+  //   }
+  // };
+  const handleOrder = async (orderId, userId) => {
+    try {
+
+      const response = await axios.post(`${serverport}/api/payment/initialize-payment`, {
+        userId,
+        amount: order.totalPrice,
+        email: localStorage.getItem("email"), 
+        orderId,
+      });
+  
+      const { authorization_url } = response.data.data;
+  
+      // Redirect to Paystack payment page
+      window.location.href = authorization_url;
+  
+      // 🎯 Optional: Update status after verifying (via webhook or Paystack redirect URL)
+    } catch (err) {
+      console.error("Paystack error:", err.response?.data || err.message);
+      toast.error("Failed to initiate Paystack payment.");
+    }
+  };
+
+  useEffect(() => {
+    const verifyPayment = async () => {
+      const reference = searchParams.get("reference");
+      if (!reference) return;
+  
+      const verifiedKey = `verified-${reference}`;
+      if (hasVerified.current || localStorage.getItem(verifiedKey)) return;
+  
+      hasVerified.current = true;
+      localStorage.setItem(verifiedKey, "true");
+  
+      try {
+        const res = await axios.get(`${serverport}/api/payment/verify/${reference}`);
+  
+        if (res.data.data.status === "success") {
+          const orderId = res.data.data.metadata.custom_fields.find(f => f.variable_name === "order_id")?.value;
+  
+          await axios.patch(`${serverport}/api/order/status/${orderId}`, {
+            status: "pay"
+          });
+  
+          toast.success("✅ Payment verified! Order marked as completed.");
+  
+          // 🔁 Force a reload (without query params)
+          setTimeout(() => {
+            window.location.replace("/client");
+          }, 2000); // optional: wait for toast to show
+        } else {
+          toast.warning("⚠ Payment was not successful.");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("❌ Verification failed.");
+      }
+    };
+  
+    verifyPayment();
+  }, []);
+  
+
+  
+
   return (
     <motion.div
       className="flex flex-col h-fit w-full max-w-md sm:max-w-lg md:max-w-xl border p-4 sm:p-6 mb-5 shadow-md hover:shadow-xl bg-blue-100 rounded-md"
@@ -122,8 +214,8 @@ function OrderInformation({ order, fetchOrders, info }) {
         )}
         {order.deliveryOption === "pickup" && status === "completed" && (
            <>
-           <PropValue property="Vendor's Name:" value={phone} />
-           <PropValue property="Vendor's Contact:" value={venName} />
+           <PropValue property="Vendor's Name:" value={venName} />
+           <PropValue property="Vendor's Contact:" value={phone}   />
          
          </>
         )}
@@ -156,10 +248,68 @@ function OrderInformation({ order, fetchOrders, info }) {
           <MdOutlineDone className="mr-2" /> Order Accepted
         </div>
       )}
-
+    
+         
       {order.deliveryOption === "pickup" && status === "completed" && (
+                  
+                <>
+             
+             <button
+                          onClick={() => handleOrder(order._id, order.userId)}
+                          className="mt-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        >
+                          Pay with MoMo (Paystack)
+            </button>
+    
+                  {/* <div className="mt-4 text-green-700 flex items-center justify-center sm:justify-start">
+                    <MdOutlineDone className="mr-2" />
+                    Order Completed
+                  </div> */}
+
+                  {/* Pickup Meal Location Button */}
+                  {/* <button
+                    onClick={handleShowMap}
+                    className="mt-2 px-4 py-2 border rounded-md bg-blue-200 hover:bg-blue-300 w-full sm:w-auto"
+                  >
+                    Pickup Meal Location
+                  </button> */}
+
+                  {/* Show Map */}
+                  {/* <PickMap showMap={showMap} setShowMap={setShowMap} route={routeCoords} /> */}
+
+                  {/* Rating Section */}
+                  {/* <div className="flex mt-4 items-center border px-3 py-2 justify-center sm:justify-start">
+                    <span className="font-semibold mr-4">Rate:</span>
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <IoStarSharp
+                        key={num}
+                        onClick={() => {
+                          setRating(num);
+                          setEditedRating(true);
+                        }}
+                        className={`mr-2 ${rating >= num ? "text-yellow-400" : "text-gray-300"} cursor-pointer`}
+                      />
+                    ))}
+                  </div> */}
+
+                  {/* {editedRating && (
+                    <button
+                      onClick={async () => {
+                        await axios.patch(`${serverport}/api/order/rate/${order._id}`, { rating });
+                        toast.info(`You rated ${rating} star(s)`);
+                        setEditedRating(false);
+                      }}
+                      className="flex items-center border mt-2 px-3 py-2 bg-green-100 hover:bg-green-200 w-full sm:w-auto justify-center"
+                    >
+                      <MdOutlineDone className="text-green-500 mr-2" />
+                      Submit Rating
+                    </button>
+                  )} */}
+                </>
+      )}
+      {order.deliveryOption === "pickup" && status === "pay" && (
         <>
-          <div className="mt-4 text-green-700 flex items-center justify-center sm:justify-start">
+            <div className="mt-4 text-green-700 flex items-center justify-center sm:justify-start">
             <MdOutlineDone className="mr-2" />
             Order Completed
           </div>
@@ -192,7 +342,7 @@ function OrderInformation({ order, fetchOrders, info }) {
 
           {editedRating && (
             <button
-              onClick={async () => {
+            onClick={async () => {
                 await axios.patch(`${serverport}/api/order/rate/${order._id}`, { rating });
                 toast.info(`You rated ${rating} star(s)`);
                 setEditedRating(false);
@@ -203,7 +353,7 @@ function OrderInformation({ order, fetchOrders, info }) {
               Submit Rating
             </button>
           )}
-        </>
+                </>
       )}
 
       {order.deliveryOption === "delivery" && status === "search" && (
@@ -224,6 +374,17 @@ function OrderInformation({ order, fetchOrders, info }) {
       )}
 
       {order.deliveryOption === "delivery" && status === "finished" && (
+        <>
+             <button
+              onClick={() => handleOrder(order._id, order.userId)}
+              className="mt-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            >
+              Pay with MoMo (Paystack)
+            </button>
+        </>
+      )}
+
+      {order.deliveryOption === "delivery" && status === "pay" && (
         <>
           <div className="flex flex-row items-center border mt-3 px-3 py-2 hover:bg-green-200 justify-center">
             <MdOutlineDone className="text-green-500 mr-2" size={22} />

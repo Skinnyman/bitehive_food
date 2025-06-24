@@ -16,6 +16,7 @@ const vendorRoutes = require("./routes/vendor")
 const mealRoutes = require("./routes/meal")
 const orderRoutes = require('./routes/order')
 const messageRoutes = require("./routes/message");
+const paymentRoutes = require('./routes/payment');
  
 
 const port = process.env.PORT || 5001
@@ -164,6 +165,8 @@ app.use("/api/vendor",vendorRoutes);
 app.use("/api/meal",mealRoutes);
 app.use("/api/order",orderRoutes);
 app.use("/api/messages", messageRoutes);
+
+app.use('/api/payment', paymentRoutes);
 
 
 

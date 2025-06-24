@@ -84,32 +84,25 @@ function Order() {
     );
   };
 // to download laction details into pdf
-  const handleShareLocationPDF = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
-      return;
-    }
-  
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
-  
-        const doc = new jsPDF();
-        doc.setFontSize(16);
-        doc.text("Delivery Location", 20, 20);
-        doc.setFontSize(12);
-        doc.text(`Latitude: ${latitude}`, 20, 40);
-        doc.text(`Longitude: ${longitude}`, 20, 50);
-  
-        doc.save("delivery_location.pdf");
-      },
-      (error) => {
-        console.error("Error fetching location:", error);
-        alert("Failed to get your location.");
-      }
-    );
-  };
+const handleShareLocationPDF = (order) => {
+  if (!order?.location?.latitude || !order?.location?.longitude) {
+    alert("Client location is not available for this order.");
+    return;
+  }
+
+  const latitude = order.location.latitude;
+  const longitude = order.location.longitude;
+
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text("CLient Delivery Location", 20, 20);
+  doc.setFontSize(12);
+  doc.text(`Latitude: ${latitude}`, 20, 40);
+  doc.text(`Longitude: ${longitude}`, 20, 50);
+
+  doc.save("vendor_location.pdf");
+};
+
   
 
   const senddata = async (orderId) => {
@@ -199,11 +192,28 @@ function Order() {
               </div>
             )}
 
-            {order.status === "completed" && order.deliveryOption === "pickup" && (
+            {order.status === "completed"  && order.deliveryOption === "pickup" && (
               <div className="flex flex-col mt-4 text-green-700 font-semibold items-center md:items-start">
                 <div className="flex items-center">
                   <MdOutlineDone className="mr-2" />
                   Order Completed
+                </div>
+                {order.rating > 0 && (
+                  <div className="flex items-center mt-2">
+                    <span className="mr-2">Rating:</span>
+                    {[...Array(order.rating)].map((_, i) => (
+                      <IoStarSharp key={i} className="text-yellow-400 mr-1" />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+          {order.status === "pay" && order.deliveryOption === "pickup" && (
+              <div className="flex flex-col mt-4 text-green-700 font-semibold items-center md:items-start">
+                <div className="flex items-center">
+                  <MdOutlineDone className="mr-2" />
+                  Payment Completed
                 </div>
                 {order.rating > 0 && (
                   <div className="flex items-center mt-2">
@@ -289,7 +299,7 @@ function Order() {
                   </div>
 
                   <div className="flex cursor-pointer flex-row items-center border px-3 py-3 mt-2 hover:bg-green-200 rounded"
-                    onClick={handleShareLocationPDF}
+                    onClick={() => handleShareLocationPDF(order)}
                   >
                     <MdOutlineShare className={`text-green-500 mr-2`} size={22} />
                     <span>Share Delivery Location</span>
@@ -317,6 +327,22 @@ function Order() {
                 <div className="flex items-center">
                   <MdOutlineDone className="mr-2" />
                   Order Completed
+                </div>
+                {order.rating > 0 && (
+                  <div className="flex items-center mt-2">
+                    <span className="mr-2">Rating:</span>
+                    {[...Array(order.rating)].map((_, i) => (
+                      <IoStarSharp key={i} className="text-yellow-400 mr-1" />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {order.status === "pay" && order.deliveryOption === "delivery" && (
+              <div className="flex flex-col mt-3 text-green-700 font-semibold">
+                <div className="flex items-center">
+                  <MdOutlineDone className="mr-2" />
+                  Payment Completed
                 </div>
                 {order.rating > 0 && (
                   <div className="flex items-center mt-2">

@@ -23,10 +23,12 @@ const togglePassword = ()=>{
 
     try {
       const response = await axios.post(`${serverport}/api/auth/login`, formData);
+  
 
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem('username', response.data.username);
+        localStorage.setItem('email',response.data.email);
         localStorage.setItem('has', response.data.hasShop);
         localStorage.setItem('id', response.data.id);
         localStorage.setItem("user", JSON.stringify(response.data));
