@@ -19,28 +19,20 @@ const togglePassword = ()=>{
   const handleChange = async (e) => {
     e.preventDefault();
     setError("");
-    setLoading(true); // Start loading
+    setLoading(true); 
 
     try {
-      const response = await axios.post(`${serverport}/api/auth/login`, formData);
-  
-
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem('username', response.data.username);
-        localStorage.setItem('email',response.data.email);
-        localStorage.setItem('has', response.data.hasShop);
-        localStorage.setItem('id', response.data.id);
-        localStorage.setItem("user", JSON.stringify(response.data));
-
-        if (response.data.role === "customer") {
-          navigate("/client");
-        } else if (response.data.hasShop === true) {
-          navigate('/vendor');
-        } else {
-          navigate("/vendorform");
+      try {
+        const res = await axios.post(`${serverport}/api/auth/login`, formData);
+        if (res.data.email) {
+          localStorage.setItem('pendingEmail', res.data.email);
+          localStorage.setItem('pendingPassword', formData.password); 
+          navigate("/verify?type=login");
         }
+      } catch (err) {
+        setError(err.response?.data?.error || "Login failed");
       }
+      
     } catch (err) {
       const errorMsg = err.response?.data?.error || "Network Issue";
       console.error("login failed:", errorMsg);

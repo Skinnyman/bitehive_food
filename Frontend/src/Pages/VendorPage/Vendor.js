@@ -95,7 +95,7 @@ useEffect(()=>{
     };
   }, [vendorId, activeChat]);
 
-  console.log(conversations)
+ // console.log(conversations)
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [activePage, setActivePage] = useState('Profile');

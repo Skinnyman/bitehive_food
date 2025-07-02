@@ -8,6 +8,7 @@ import PickMap from '../../Components/PickMap';
 const VendorForm = () => {
   const navigate = useNavigate();
   const user = localStorage.getItem('id');
+ // console.log(user)
 
   const [formData, setFormData] = useState({
     userId: user,
@@ -17,6 +18,7 @@ const VendorForm = () => {
     email: '',
     description: '',
     delivery: '',
+    network:"",
     location: {
       latitude: '',
       longitude: '',
@@ -97,6 +99,18 @@ const VendorForm = () => {
             required
             className="w-full border rounded-lg p-3 mb-3"
           />
+           <select
+            name="delivery"
+            value={formData.network}
+            onChange={(e) => setFormData({ ...formData, network: e.target.value })}
+            required
+            className="w-full border rounded-lg p-3"
+          >
+            <option value="">Choose Your network</option>
+            <option value="MTN">MTN</option>
+            <option value="ATL">ATL</option>
+            <option value="VDF">VDF</option>
+          </select>
           <input
             type="email"
             name="email"

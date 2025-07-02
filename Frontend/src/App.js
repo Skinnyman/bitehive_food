@@ -10,6 +10,7 @@ import VendorProf from './Pages/Vendor Profile/VendorProf';
 import "mapbox-gl/dist/mapbox-gl.css";
 import Favorite from './Pages/Favorite Page/Favorite';
 import { ToastContainer } from 'react-toastify';
+import Verify from './Pages/Verify Page/Verify';
 
 //  Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -30,6 +31,7 @@ function App() {
         <Route path="/" element={<Landing darkmode={darkmode} toggle={toggle} />} />
         <Route path="login" element={<Login darkmode={darkmode} toggle={toggle} />} />
         <Route path="register" element={<Register darkmode={darkmode} toggle={toggle} />} />
+        <Route path="verify" element={<Verify/>}/>
 
         {/* 🔒 Protected Routes */}
        

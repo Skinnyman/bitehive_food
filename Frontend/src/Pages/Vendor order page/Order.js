@@ -95,12 +95,12 @@ const handleShareLocationPDF = (order) => {
 
   const doc = new jsPDF();
   doc.setFontSize(16);
-  doc.text("CLient Delivery Location", 20, 20);
+  doc.text("Client Delivery Location", 20, 20);
   doc.setFontSize(12);
   doc.text(`Latitude: ${latitude}`, 20, 40);
   doc.text(`Longitude: ${longitude}`, 20, 50);
 
-  doc.save("vendor_location.pdf");
+  doc.save("Client_location.pdf");
 };
 
   

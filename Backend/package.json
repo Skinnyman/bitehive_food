@@ -12,7 +12,7 @@
     "@aws-sdk/client-s3": "^3.828.0",
     "@aws-sdk/credential-provider-env": "^3.826.0",
     "aws-sdk": "^2.1692.0",
-    "axios": "^1.6.7",
+    "axios": "^1.10.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "debug": "^4.3.4",
@@ -28,7 +28,8 @@
     "multer-s3": "^3.0.1",
     "openai": "^4.10.0",
     "paystack": "^2.0.1",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "nodemailer": "^6.9.8"
   },
   "devDependencies": {
     "jest": "^29.6.4",

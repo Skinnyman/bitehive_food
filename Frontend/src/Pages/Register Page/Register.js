@@ -22,34 +22,21 @@ function Register({darkmode,toggle}) {
     }
     setLoading(true);
    try{
-        const response = await axios.post(`${serverport}/api/auth/register`, formData);
-       // navigate("/login");
-        console.log("Message:", response.data.msg)
-        if (response.data.msg === "User registered successfully") {
-          const user = response.data.user;
-        
-          if (user) {
-            localStorage.setItem("user", JSON.stringify(user));
-            localStorage.setItem("token", response.data.token || "dummy-token"); 
-            localStorage.setItem("username", user.username);
-            localStorage.setItem("has", user.hasShop);
-            localStorage.setItem("id", user.id);
-        
-            if (user.role === "customer") {
-              navigate("/client");
-            } else if (user.hasShop === true) {
-              navigate('/vendor');
-            } else {
-              navigate("/vendorform");
-            }
-          }
-        }
-        
+    const response = await axios.post(`${serverport}/api/auth/register`, formData);
+    if (response.data.email) {
+      localStorage.setItem('pendingEmail', response.data.email);
+      localStorage.setItem('pendingUsername', formData.username);
+      localStorage.setItem('pendingPassword', formData.password);
+      localStorage.setItem('pendingRole', formData.role);
+      navigate("/verify?type=signup");
+    }
+    
 
    } catch(err) {
        const errorMsg = err.response.data.msg || "Something went wrong";
           console.log("Registration error",errorMsg);
            setError(errorMsg)
+           setLoading(false);
    }
   
   }
@@ -116,7 +103,7 @@ function Register({darkmode,toggle}) {
                             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-2 text-white rounded-md font-bold transition flex justify-center items-center gap-2
+              className={`w-full py-2 text-white rounded-md font-bold transition flex justify-center items-center gap-2 relative top-4
                 ${loading ? 'bg-yellow-300 cursor-not-allowed' : 'bg-yellow-400 hover:bg-yellow-500'}
               `}
             >

@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const Vendor = require('../Models/Vendor');
+const Order = require("../Models/orderedmeal")
 const router = express.Router();
 require('dotenv').config();
 
@@ -22,8 +23,9 @@ router.post('/initialize-payment', async (req, res) => {
       {
         email,
         amount: amount * 100,
-        channels: ['mobile_money'], // only show MoMo
+        channels: ['mobile_money'], 
         callback_url: (`${frontPort}/client`),
+        subaccount: vendor.subaccountCode,
         metadata: {
           custom_fields: [
             {
@@ -53,7 +55,7 @@ router.post('/initialize-payment', async (req, res) => {
   }
 });
 
-// Optional: Verify payment
+//To verify the payment
 router.get('/verify/:reference', async (req, res) => {
   const { reference } = req.params;
 
@@ -64,6 +66,8 @@ router.get('/verify/:reference', async (req, res) => {
         Authorization: `Bearer ${PAYSTACK_SECRET}`,
       },
     });
+      
+    
 
     res.json(verifyRes.data);
   
@@ -72,4 +76,75 @@ router.get('/verify/:reference', async (req, res) => {
   }
 });
 
+// router.get('/verify/:reference', async (req, res) => {
+//     const { reference } = req.params;
+  
+//     try {
+//       const verifyRes = await axios.get(`https://api.paystack.co/transaction/verify/${reference}`, {
+//         headers: {
+//           Authorization: `Bearer ${PAYSTACK_SECRET}`,
+//         },
+//       });
+  
+//       const data = verifyRes.data.data;
+  
+//       if (data.status === "success") {
+//         const orderId = data.metadata?.custom_fields?.find(f => f.variable_name === "order_id")?.value;
+//         // ✅ Mark order as paid
+//       await Order.findByIdAndUpdate(orderId, { status: "pay" });
+// V
+//         const order = await Order.findById(orderId);
+  
+//         const vendor = await Vendor.findOne({userId: userId});
+  
+//         // Register vendor as transfer recipient if not already
+//         if (!vendor.recipientCode) {
+//           const createRecipient = await axios.post(
+//             "https://api.paystack.co/transferrecipient",
+//             {
+//               type: "mobile_money",
+//               name: vendor.contactPerson,
+//               account_number: vendor.phone,
+//               bank_code: vendor.network, 
+//               currency: "GHS",
+//             },
+//             {
+//               headers: {
+//                 Authorization: `Bearer ${PAYSTACK_SECRET}`,
+//                 'Content-Type': 'application/json',
+//               },
+//             }
+//           );
+  
+//           vendor.recipientCode = createRecipient.data.data.recipient_code;
+//           await vendor.save();
+//         }
+  
+//         //  Send MoMo to vendor
+//         await axios.post(
+//           "https://api.paystack.co/transfer",
+//           {
+//             source: "balance",
+//             amount: order.totalPrice * 100,
+//             recipient: vendor.recipientCode,
+//             reason: `Payment for Order ${orderId}`,
+//           },
+//           {
+//             headers: {
+//               Authorization: `Bearer ${PAYSTACK_SECRET}`,
+//               'Content-Type': 'application/json',
+//             },
+//           }
+//         );
+  
+//         return res.json({ message: "Payment verified and MoMo sent to vendor" });
+//       }
+  
+//       res.status(400).json({ error: "Payment not successful" });
+//     } catch (err) {
+//       console.error(err.response?.data || err.message);
+//       res.status(500).json({ error: err.message });
+//     }
+//   });
+  
 module.exports = router;

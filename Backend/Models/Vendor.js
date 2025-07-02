@@ -27,11 +27,23 @@ const VendorSchema = new mongoose.Schema({
 		required: true,
 		
 	},
+	network: {
+		type: String,
+		required: true,
+		
+	},
 	location: {
 		latitude: String,
 		longitude: String,
 		address: String, 
-	  } 
+	  } ,
+	  recipientCode: { 
+		type: String 
+	},
+	  subaccountCode: {
+		type: String,
+		default: ""
+	  },
 })
 
 module.exports = mongoose.model("Vendor",VendorSchema);

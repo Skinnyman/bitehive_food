@@ -4,7 +4,11 @@ const User = require("../Models/user")
 const router = express.Router();
 const Orders = require("../Models/orderedmeal")
 const Favorite = require("../Models/favorite")
+const axios = require("axios");
 
+require("dotenv").config();
+
+const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY;
 // Register Vendor shop
 // router.post("/register",async (req,res)=>{
 //     const{userId,businessName,email,contactPerson,description,phone,delivery}= req.body;
@@ -27,9 +31,29 @@ const Favorite = require("../Models/favorite")
 
 // })
 router.post('/register', async (req, res) => {
-    const{userId,businessName,email,contactPerson,description,phone,delivery,location}= req.body;
-    const vendor = await Vendor.create({userId,businessName,email,contactPerson,description,phone,delivery,location});
+    const{userId,businessName,email,contactPerson,network,description,phone,delivery,location}= req.body;
+    const vendor = await Vendor.create({userId,businessName,email,contactPerson,description,phone,delivery,location,network});
      await User.findByIdAndUpdate(userId, { hasVendorShop: true });
+     
+     const response = await axios.post( "https://api.paystack.co/subaccount",{
+      business_name: contactPerson,
+      settlement_bank:vendor.network,
+      account_number: vendor.phone,
+      percentage_charge:0,
+      description:"Vendor subaccount for split payment",
+      primary_contact_email: email,
+     },
+     {
+       headers:{
+         Authorization: `Bearer ${PAYSTACK_SECRET}`,
+         "Content-Type": "application/json",
+        },
+      }
+    )
+    const subaccountCode = response.data.data.subaccount_code;
+    vendor.subaccountCode = subaccountCode;
+    await vendor.save();
+
     res.status(201).json(vendor);
    
   });
