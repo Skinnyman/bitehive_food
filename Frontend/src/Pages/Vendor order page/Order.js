@@ -83,7 +83,7 @@ function Order() {
       }
     );
   };
-// to download laction details into pdf
+// to download location details into pdf
 const handleShareLocationPDF = (order) => {
   if (!order?.location?.latitude || !order?.location?.longitude) {
     alert("Client location is not available for this order.");
