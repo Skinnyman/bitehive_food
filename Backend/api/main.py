@@ -47,6 +47,8 @@ feature_ranges = {
 # FastAPI setup
 app = FastAPI()
 
+
+
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 app.add_middleware(
     CORSMiddleware,
@@ -55,6 +57,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/")
+async def root():
+    return {"message": "BiteHive API is running!"}
 
 class UserInput(BaseModel):
     Age: int
