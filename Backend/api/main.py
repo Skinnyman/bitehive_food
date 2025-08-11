@@ -210,3 +210,8 @@ async def predict(user_input: UserInput):
             status_code=500, 
             detail=f"Internal server error: {str(e)}"
         )
+    
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))  # Use Render's port or 8000 as fallback
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=port)    
