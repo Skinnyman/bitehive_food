@@ -23,70 +23,103 @@ meal_encoders = {
     'Dinner_Meal': joblib.load('Dinner_Meal_encoder.pkl')
 }
 
-# Calorie ranges for different meals
+# Enhanced meal database with accurate nutritional profiles
+MEAL_DATABASE = {
+    # Breakfast meals
+    "Oatmeal_with_Nuts": {"Calories": 380, "Protein_g": 12, "Carbs_g": 58, "Fats_g": 12},
+    "Boiled_Yam_with_Garden_Eggs_Sauce": {"Calories": 420, "Protein_g": 8, "Carbs_g": 85, "Fats_g": 7},
+    "Koko_with_Koose": {"Calories": 320, "Protein_g": 11, "Carbs_g": 48, "Fats_g": 9},
+    "Fried_Plantain_with_Beans": {"Calories": 550, "Protein_g": 18, "Carbs_g": 82, "Fats_g": 18},
+    "Waakye_with_Fried_Fish": {"Calories": 620, "Protein_g": 28, "Carbs_g": 92, "Fats_g": 15},
+    "Beans_with_Plantain": {"Calories": 480, "Protein_g": 16, "Carbs_g": 78, "Fats_g": 12},
+    "Boiled_Eggs_with_Spinach": {"Calories": 180, "Protein_g": 15, "Carbs_g": 5, "Fats_g": 12},
+    "Vegetable_Omlette": {"Calories": 220, "Protein_g": 18, "Carbs_g": 8, "Fats_g": 14},
+    
+    # Lunch meals
+    "Grilled_Fish_with_Steamed_Vegetables": {"Calories": 450, "Protein_g": 35, "Carbs_g": 25, "Fats_g": 22},
+    "Jollof_Rice_with_Grilled_Chicken": {"Calories": 680, "Protein_g": 42, "Carbs_g": 85, "Fats_g": 18},
+    "Fufu_with_Light_Soup_and_Meat": {"Calories": 750, "Protein_g": 38, "Carbs_g": 110, "Fats_g": 15},
+    "Banku_with_Tilapia": {"Calories": 820, "Protein_g": 45, "Carbs_g": 125, "Fats_g": 20},
+    "Waakye_with_Grilled_Chicken": {"Calories": 650, "Protein_g": 40, "Carbs_g": 90, "Fats_g": 15},
+    "Red_Red_with_Fried_Plantain": {"Calories": 580, "Protein_g": 22, "Carbs_g": 85, "Fats_g": 18},
+    "Grilled_Chicken_Salad": {"Calories": 280, "Protein_g": 30, "Carbs_g": 10, "Fats_g": 14},
+    "Steamed_Fish_with_Vegetables": {"Calories": 320, "Protein_g": 35, "Carbs_g": 15, "Fats_g": 12},
+    
+    # Dinner meals
+    "Okro_Stew_with_Lean_Beef": {"Calories": 520, "Protein_g": 40, "Carbs_g": 45, "Fats_g": 20},
+    "Grilled_Chicken_with_Salad": {"Calories": 480, "Protein_g": 45, "Carbs_g": 25, "Fats_g": 22},
+    "Light_Soup_with_Chicken": {"Calories": 450, "Protein_g": 38, "Carbs_g": 40, "Fats_g": 18},
+    "Vegetable_Stir_Fry_with_Beef": {"Calories": 490, "Protein_g": 35, "Carbs_g": 35, "Fats_g": 22},
+    "Palava_Sauce_with_Fish": {"Calories": 460, "Protein_g": 32, "Carbs_g": 42, "Fats_g": 18},
+    "Garden_Egg_Stew_with_Boiled_Yam": {"Calories": 480, "Protein_g": 15, "Carbs_g": 85, "Fats_g": 12},
+    
+    # Modified versions
+    "Boiled_Plantain_with_Beans": {"Calories": 420, "Protein_g": 16, "Carbs_g": 75, "Fats_g": 10},
+    "Waakye_with_Grilled_Fish": {"Calories": 520, "Protein_g": 35, "Carbs_g": 65, "Fats_g": 12},
+    "Fufu_with_Light_Soup_and_Lean_Meat": {"Calories": 650, "Protein_g": 45, "Carbs_g": 95, "Fats_g": 12},
+    "Banku_with_Grilled_Tilapia": {"Calories": 700, "Protein_g": 50, "Carbs_g": 100, "Fats_g": 18},
+    "Jollof_Rice_with_Grilled_Chicken_and_Vegetables": {"Calories": 600, "Protein_g": 45, "Carbs_g": 75, "Fats_g": 15},
+    "Oatmeal_with_Nuts_and_Protein_Powder": {"Calories": 420, "Protein_g": 25, "Carbs_g": 50, "Fats_g": 12},
+    "Koko_with_Koose_and_Peanut_Butter": {"Calories": 380, "Protein_g": 16, "Carbs_g": 42, "Fats_g": 15},
+    "Grilled_Fish_with_Steamed_Vegetables_and_Eggs": {"Calories": 520, "Protein_g": 45, "Carbs_g": 25, "Fats_g": 28}
+}
+
+# Default nutritional profile if meal not found in database
+DEFAULT_MEAL_PROFILE = {"Calories": 500, "Protein_g": 25, "Carbs_g": 60, "Fats_g": 15}
+
+# Calorie ranges for different meals (updated for accuracy)
 MEAL_CALORIES = {
-    "breakfast": (300, 700),
-    "lunch": (500, 1000),
-    "dinner": (500, 1000),
-    "snacks": (150, 400)
+    "breakfast": (300, 500),
+    "lunch": (450, 750),
+    "dinner": (400, 650),
+    "snacks": (150, 300)
 }
 
-# Protein ranges for different meals
+# Protein ranges for different meals (updated for accuracy)
 MEAL_PROTEIN = {
-    "breakfast": (15, 40),
-    "lunch": (20, 60),
-    "dinner": (20, 60),
-    "snacks": (5, 20)
+    "breakfast": (10, 30),
+    "lunch": (20, 50),
+    "dinner": (20, 45),
+    "snacks": (5, 15)
 }
 
-# Define snack nutrition profiles for different goals
+# Enhanced snack nutrition profiles for different goals
 SNACK_NUTRITION = {
     "Weight Loss": [
-        {"Meal": "Fresh Fruit Salad", "Calories": 150, "Protein_g": 3, "Carbs_g": 35, "Fats_g": 0.5},
-        {"Meal": "Yogurt with Honey", "Calories": 180, "Protein_g": 10, "Carbs_g": 25, "Fats_g": 5},
-        {"Meal": "Boiled Eggs", "Calories": 140, "Protein_g": 12, "Carbs_g": 1, "Fats_g": 10}
+        {"Meal": "Fresh Fruit Salad", "Calories": 120, "Protein_g": 2, "Carbs_g": 28, "Fats_g": 0.3},
+        {"Meal": "Greek Yogurt with Berries", "Calories": 100, "Protein_g": 12, "Carbs_g": 10, "Fats_g": 2},
+        {"Meal": "Vegetable Sticks with Hummus", "Calories": 150, "Protein_g": 6, "Carbs_g": 15, "Fats_g": 8},
+        {"Meal": "Boiled Eggs (2)", "Calories": 140, "Protein_g": 12, "Carbs_g": 1, "Fats_g": 10}
     ],
     "Muscle Gain": [
-        {"Meal": "Protein Shake", "Calories": 250, "Protein_g": 25, "Carbs_g": 20, "Fats_g": 8},
-        {"Meal": "Koose (Bean Cake) with Peanut Butter", "Calories": 300, "Protein_g": 15, "Carbs_g": 30, "Fats_g": 12},
-        {"Meal": "Roasted Plantain with Groundnuts", "Calories": 350, "Protein_g": 12, "Carbs_g": 45, "Fats_g": 15}
+        {"Meal": "Protein Shake", "Calories": 200, "Protein_g": 30, "Carbs_g": 15, "Fats_g": 5},
+        {"Meal": "Koose with Peanut Butter", "Calories": 280, "Protein_g": 12, "Carbs_g": 25, "Fats_g": 15},
+        {"Meal": "Roasted Plantain with Groundnuts", "Calories": 320, "Protein_g": 8, "Carbs_g": 40, "Fats_g": 15}
     ],
     "Maintain Weight": [
-        {"Meal": "Nkatie Cake (Groundnut Cake)", "Calories": 200, "Protein_g": 8, "Carbs_g": 20, "Fats_g": 10},
-        {"Meal": "Plantain Chips", "Calories": 250, "Protein_g": 2, "Carbs_g": 30, "Fats_g": 12},
-        {"Meal": "Yogurt with Granola", "Calories": 220, "Protein_g": 10, "Carbs_g": 30, "Fats_g": 6}
+        {"Meal": "Nkatie Cake (Groundnut Cake)", "Calories": 180, "Protein_g": 6, "Carbs_g": 15, "Fats_g": 12},
+        {"Meal": "Plantain Chips (Small)", "Calories": 200, "Protein_g": 2, "Carbs_g": 25, "Fats_g": 10},
+        {"Meal": "Yogurt with Granola", "Calories": 180, "Protein_g": 8, "Carbs_g": 25, "Fats_g": 5}
     ],
     "Healthy Eating": [
-        {"Meal": "Fresh Fruit Salad", "Calories": 150, "Protein_g": 3, "Carbs_g": 35, "Fats_g": 0.5},
-        {"Meal": "Vegetable Sticks with Hummus", "Calories": 180, "Protein_g": 5, "Carbs_g": 20, "Fats_g": 10},
-        {"Meal": "Boiled Eggs with Avocado", "Calories": 200, "Protein_g": 10, "Carbs_g": 8, "Fats_g": 15}
+        {"Meal": "Fresh Fruit Salad", "Calories": 150, "Protein_g": 2, "Carbs_g": 35, "Fats_g": 0.5},
+        {"Meal": "Vegetable Sticks with Hummus", "Calories": 160, "Protein_g": 5, "Carbs_g": 15, "Fats_g": 10},
+        {"Meal": "Boiled Eggs with Avocado", "Calories": 220, "Protein_g": 10, "Carbs_g": 8, "Fats_g": 18}
     ]
 }
 
-# Default snack if no match found
-DEFAULT_SNACK = {"Meal": "Fresh Fruit Salad", "Calories": 150, "Protein_g": 3, "Carbs_g": 35, "Fats_g": 0.5}
-
-# Get feature ranges for manual normalization
-feature_ranges = {
-    'Age': (18, 80),
-    'Weight_kg': (45, 120),
-    'Height_m': (1.5, 2.0),
-    'Gender': (0, 1),
-    'Goal_encoded': (0, len(goal_encoder.classes_)-1)
-}
-
-# Define goal-based meal preferences
+# Enhanced goal-based meal preferences
 GOAL_MEAL_PREFERENCES = {
     "Weight Loss": {
         "preferred": {
-            "Breakfast_Meal": ["Oatmeal_with_Nuts", "Boiled_Yam_with_Garden_Eggs_Sauce"],
-            "Lunch_Meal": ["Grilled_Fish_with_Steamed_Vegetables", "Jollof_Rice_with_Grilled_Chicken"],
-            "Dinner_Meal": ["Okro_Stew_with_Lean_Beef", "Grilled_Fish_with_Steamed_Vegetables"]
+            "Breakfast_Meal": ["Oatmeal_with_Nuts", "Boiled_Eggs_with_Spinach", "Vegetable_Omlette"],
+            "Lunch_Meal": ["Grilled_Fish_with_Steamed_Vegetables", "Steamed_Fish_with_Vegetables", "Grilled_Chicken_Salad"],
+            "Dinner_Meal": ["Okro_Stew_with_Lean_Beef", "Grilled_Fish_with_Steamed_Vegetables", "Vegetable_Stir_Fry_with_Beef"]
         },
         "avoid": {
             "Breakfast_Meal": ["Fried_Plantain_with_Beans", "Waakye_with_Fried_Fish"],
-            "Lunch_Meal": ["Fufu_with_Light_Soup_and_Meat", "Banku_with_Tilapia"],
-            "Dinner_Meal": ["Fufu_with_Light_Soup_and_Meat", "Banku_with_Tilapia"]
+            "Lunch_Meal": ["Fufu_with_Light_Soup_and_Meat", "Banku_with_Tilapia", "Jollof_Rice_with_Grilled_Chicken"],
+            "Dinner_Meal": ["Fufu_with_Light_Soup_and_Meat", "Banku_with_Tilapia", "Red_Red_with_Fried_Plantain"]
         }
     },
     "Muscle Gain": {
@@ -166,6 +199,15 @@ MEAL_MODIFICATIONS = {
     }
 }
 
+# Get feature ranges for manual normalization
+feature_ranges = {
+    'Age': (18, 80),
+    'Weight_kg': (45, 120),
+    'Height_m': (1.5, 2.0),
+    'Gender': (0, 1),
+    'Goal_encoded': (0, len(goal_encoder.classes_)-1)
+}
+
 # FastAPI setup
 app = FastAPI()
 
@@ -202,11 +244,26 @@ class RecommendationOutput(BaseModel):
     dinner: MealRecommendation
     snacks: MealRecommendation
 
+def get_meal_nutrition(meal_name):
+    """Get verified nutritional values from database or use default"""
+    # First try exact match
+    if meal_name in MEAL_DATABASE:
+        return MEAL_DATABASE[meal_name]
+    
+    # Try base meal name if modified version not found
+    base_name = meal_name.split(" with ")[0]
+    if base_name in MEAL_DATABASE:
+        return MEAL_DATABASE[base_name]
+    
+    # Log missing meals for debugging
+    print(f"Warning: Meal '{meal_name}' not found in database. Using default profile.")
+    return DEFAULT_MEAL_PROFILE
+
 def get_goal_specific_snack(goal):
     """Select a random snack appropriate for the user's goal"""
     snacks = SNACK_NUTRITION.get(goal, [])
     if not snacks:
-        return DEFAULT_SNACK
+        return {"Meal": "Fresh Fruit Salad", "Calories": 150, "Protein_g": 2, "Carbs_g": 35, "Fats_g": 0.5}
     return random.choice(snacks)
 
 def modify_meal_for_goal(meal_name, meal_type, goal):
@@ -292,6 +349,31 @@ def decode_meal(probs, encoder, meal_type="other", goal=None, temperature=1.0):
     meal_name = encoder.inverse_transform([idx])[0]
     return meal_name
 
+def get_weight_loss_meal(meal_type, goal, encoder):
+    """Select a meal specifically optimized for weight loss goals with variety"""
+    category = {
+        "breakfast": "Breakfast_Meal",
+        "lunch": "Lunch_Meal",
+        "dinner": "Dinner_Meal"
+    }[meal_type]
+    
+    # Get preferred meals for weight loss
+    preferred = GOAL_MEAL_PREFERENCES[goal]["preferred"].get(category, [])
+    
+    # Filter to meals actually in our database
+    valid_meals = [meal for meal in preferred if meal in MEAL_DATABASE]
+    
+    if valid_meals:
+        # Sort by calories (ascending) but keep variety
+        valid_meals.sort(key=lambda x: MEAL_DATABASE[x]["Calories"])
+        
+        # Return top 3 lowest calorie options for variety
+        return valid_meals[:3]
+    
+    # Fallback to original decoding if no preferred meals
+    probs = np.ones(len(encoder.classes_)) / len(encoder.classes_)
+    return [decode_meal(probs, encoder, meal_type, goal)]
+
 def manual_normalize(features):
     """Manually normalize features to [0,1] range"""
     normalized = []
@@ -341,55 +423,79 @@ def calculate_nutritional_needs(weight, height, age, gender, goal):
         "fats_g": fat_g
     }
 
-def validate_and_correct_meal(meal_type, meal_data, actual_needs):
+def validate_and_correct_meal(meal_type, meal_data, actual_needs, goal):
     """Validate and correct unrealistic nutritional values for a meal"""
-    # Check calories
-    min_cal, max_cal = MEAL_CALORIES[meal_type]
-    current_cal = meal_data["Calories"]
+    meal_name = meal_data["Meal"]
     
-    # Check protein
+    # Lookup strategy: try exact name, then base name
+    if meal_name in MEAL_DATABASE:
+        verified_profile = MEAL_DATABASE[meal_name]
+    else:
+        base_meal = meal_name.split(" with ")[0]
+        verified_profile = MEAL_DATABASE.get(base_meal, DEFAULT_MEAL_PROFILE)
+        if base_meal not in MEAL_DATABASE:
+            print(f"Warning: Base meal '{base_meal}' not found for '{meal_name}'")
+
+    # Adjust portion size to meet calorie targets
+    calorie_target = (MEAL_CALORIES[meal_type][0] + MEAL_CALORIES[meal_type][1]) / 2
+    portion_factor = calorie_target / verified_profile["Calories"]
+    
+    # Apply portion adjustment to all nutrients
+    adjusted_profile = {}
+    for nutrient, value in verified_profile.items():
+        adjusted_profile[nutrient] = value * portion_factor
+    
+    # Ensure we're within meal-specific ranges
+    min_cal, max_cal = MEAL_CALORIES[meal_type]
     min_pro, max_pro = MEAL_PROTEIN[meal_type]
-    current_pro = meal_data["Protein_g"]
     
     # Calorie adjustment
-    if current_cal < min_cal or current_cal > max_cal:
-        # Calculate adjustment factor
-        if current_cal < min_cal:
-            adjustment = min_cal / current_cal
-        else:
-            adjustment = max_cal / current_cal
-            
-        # Apply proportional adjustment
-        for nutrient in ["Calories", "Protein_g", "Carbs_g", "Fats_g"]:
-            meal_data[nutrient] *= adjustment
-        print(f"Adjusted {meal_type} calories: {current_cal:.1f} → {meal_data['Calories']:.1f}")
+    if adjusted_profile["Calories"] < min_cal:
+        adjustment = min_cal / adjusted_profile["Calories"]
+        for nutrient in adjusted_profile:
+            adjusted_profile[nutrient] *= adjustment
+    elif adjusted_profile["Calories"] > max_cal:
+        adjustment = max_cal / adjusted_profile["Calories"]
+        for nutrient in adjusted_profile:
+            adjusted_profile[nutrient] *= adjustment
     
     # Protein adjustment
-    if current_pro < min_pro or current_pro > max_pro:
-        # Calculate adjustment factor
-        if current_pro < min_pro:
-            adjustment = min_pro / current_pro
-        else:
-            adjustment = max_pro / current_pro
-            
-        # Apply proportional adjustment to protein only
-        protein_ratio = meal_data["Protein_g"] / meal_data["Calories"]
-        meal_data["Protein_g"] *= adjustment
-        
-        # Adjust carbs/fats to maintain calorie balance
-        calorie_diff = (meal_data["Protein_g"] - current_pro) * 4
-        if calorie_diff > 0:
-            # Reduce carbs to compensate for increased protein calories
-            meal_data["Carbs_g"] -= calorie_diff / 4
-        else:
-            # Increase carbs to compensate for decreased protein calories
-            meal_data["Carbs_g"] -= calorie_diff / 4
-            
-        print(f"Adjusted {meal_type} protein: {current_pro:.1f}g → {meal_data['Protein_g']:.1f}g")
+    if adjusted_profile["Protein_g"] < min_pro:
+        protein_deficit = min_pro - adjusted_profile["Protein_g"]
+        adjusted_profile["Protein_g"] = min_pro
+        # Adjust carbs down to compensate for protein increase
+        adjusted_profile["Carbs_g"] -= protein_deficit * 4 / 4  # Protein has 4 cal/g
+    elif adjusted_profile["Protein_g"] > max_pro:
+        protein_surplus = adjusted_profile["Protein_g"] - max_pro
+        adjusted_profile["Protein_g"] = max_pro
+        # Adjust carbs up to compensate for protein decrease
+        adjusted_profile["Carbs_g"] += protein_surplus * 4 / 4
     
-    return meal_data
+    # Special adjustments for weight loss
+    if goal == "Weight Loss":
+        # Reduce calories by an additional 10%
+        if "Calories" in adjusted_profile:
+            adjusted_profile["Calories"] *= 0.9
+            
+        # Increase protein content
+        if "Protein_g" in adjusted_profile:
+            adjusted_profile["Protein_g"] *= 1.2
+            
+        # Reduce carbs and fats
+        if "Carbs_g" in adjusted_profile:
+            adjusted_profile["Carbs_g"] *= 0.85
+        if "Fats_g" in adjusted_profile:
+            adjusted_profile["Fats_g"] *= 0.85
+    
+    return {
+        "Meal": meal_name,
+        "Calories": adjusted_profile["Calories"],
+        "Protein_g": adjusted_profile["Protein_g"],
+        "Carbs_g": adjusted_profile["Carbs_g"],
+        "Fats_g": adjusted_profile["Fats_g"]
+    }
 
-def scale_nutrition(prediction, actual_needs):
+def scale_nutrition(prediction, actual_needs, goal):
     """Scale nutrition to match calculated needs with validation checks"""
     # Calculate totals from prediction (only breakfast, lunch, dinner)
     total_calories = (
@@ -418,13 +524,16 @@ def scale_nutrition(prediction, actual_needs):
         protein_deficit = actual_needs['protein_g'] - total_protein
         for meal in ['breakfast', 'lunch', 'dinner']:
             prediction[meal]['Protein_g'] += protein_deficit / 3
+            # Adjust carbs down to compensate
+            prediction[meal]['Carbs_g'] -= (protein_deficit / 3) * 4 / 4
     
     # Validate and correct each meal
     for meal_type in ['breakfast', 'lunch', 'dinner']:
         prediction[meal_type] = validate_and_correct_meal(
             meal_type, 
             prediction[meal_type],
-            actual_needs
+            actual_needs,
+            goal
         )
     
     return prediction
@@ -461,58 +570,66 @@ async def predict(user_input: UserInput):
         preds = model.predict(X_processed)
         
         # Process outputs with goal-based adjustments
-        numeric_out = preds[0][0]
-        breakfast_meal = decode_meal(
-            preds[1][0], 
-            meal_encoders['Breakfast_Meal'], 
-            "breakfast",
-            goal=user_input.Goal
-        )
-        lunch_meal = decode_meal(
-            preds[2][0], 
-            meal_encoders['Lunch_Meal'], 
-            "lunch",
-            goal=user_input.Goal
-        )
-        dinner_meal = decode_meal(
-            preds[3][0], 
-            meal_encoders['Dinner_Meal'], 
-            "dinner",
-            goal=user_input.Goal
-        )
+        if user_input.Goal == "Weight Loss":
+            # Get top 3 options for each meal type
+            breakfast_options = get_weight_loss_meal("breakfast", user_input.Goal, meal_encoders['Breakfast_Meal'])
+            lunch_options = get_weight_loss_meal("lunch", user_input.Goal, meal_encoders['Lunch_Meal'])
+            dinner_options = get_weight_loss_meal("dinner", user_input.Goal, meal_encoders['Dinner_Meal'])
+            
+            # Randomly select one from each list
+            breakfast_meal = random.choice(breakfast_options)
+            lunch_meal = random.choice(lunch_options)
+            dinner_meal = random.choice(dinner_options)
+        else:
+            # Original method for other goals
+            breakfast_meal = decode_meal(
+                preds[1][0], 
+                meal_encoders['Breakfast_Meal'], 
+                "breakfast",
+                goal=user_input.Goal
+            )
+            lunch_meal = decode_meal(
+                preds[2][0], 
+                meal_encoders['Lunch_Meal'], 
+                "lunch",
+                goal=user_input.Goal
+            )
+            dinner_meal = decode_meal(
+                preds[3][0], 
+                meal_encoders['Dinner_Meal'], 
+                "dinner",
+                goal=user_input.Goal
+            )
         
         # Apply meal modifications based on goal
         breakfast_meal = modify_meal_for_goal(breakfast_meal, "breakfast", user_input.Goal)
         lunch_meal = modify_meal_for_goal(lunch_meal, "lunch", user_input.Goal)
         dinner_meal = modify_meal_for_goal(dinner_meal, "dinner", user_input.Goal)
         
-        # Structure the response (only breakfast, lunch, dinner)
+        # Structure the response with meal names
         result = {
             'breakfast': {
-                "Calories": float(numeric_out[0]),
-                "Protein_g": float(numeric_out[1]),
-                "Carbs_g": float(numeric_out[2]),
-                "Fats_g": float(numeric_out[3]),
                 "Meal": breakfast_meal
             },
             'lunch': {
-                "Calories": float(numeric_out[4]),
-                "Protein_g": float(numeric_out[5]),
-                "Carbs_g": float(numeric_out[6]),
-                "Fats_g": float(numeric_out[7]),
                 "Meal": lunch_meal
             },
             'dinner': {
-                "Calories": float(numeric_out[8]),
-                "Protein_g": float(numeric_out[9]),
-                "Carbs_g": float(numeric_out[10]),
-                "Fats_g": float(numeric_out[11]),
                 "Meal": dinner_meal
             }
         }
         
+        # Add initial nutrition values
+        for meal_type in ['breakfast', 'lunch', 'dinner']:
+            meal_name = result[meal_type]["Meal"]
+            nutrition = get_meal_nutrition(meal_name)
+            result[meal_type] = {
+                **nutrition,
+                "Meal": meal_name
+            }
+        
         # Scale and validate nutrition to match calculated needs
-        result = scale_nutrition(result, actual_needs)
+        result = scale_nutrition(result, actual_needs, user_input.Goal)
         
         # Add goal-specific snack
         snack = get_goal_specific_snack(user_input.Goal)
