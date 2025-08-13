@@ -162,9 +162,9 @@ router.get('/orderinfo', async (req,res)=> {
     const totalOrders = orders.length;
     const pendingOrders = orders.filter(o => o.status === 'pending').length
     const cancelledOrders = orders.filter(o =>o.status==='cancelled').length
-    const completedOrders = orders.filter(o=>o.status === 'completed').length 
+    const completedOrders = orders.filter(o=>o.status === 'pay').length 
     const finishedOrders = orders.filter(o=>o.status === 'finished').length 
-
+    console.log(completedOrders)
 
     const totalEarning = orders
     .filter(o => o.status === 'completed')
