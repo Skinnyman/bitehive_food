@@ -106,8 +106,8 @@ useEffect(()=>{
     { label: 'Products', icon: <Inventory2Icon fontSize="small" /> },
     { label: 'Orders', icon: <ShoppingCartIcon fontSize="small" /> },
     { label: 'Chat', icon: <FaComments fontSize="small" /> },
-    { label: 'Settings & Preferences', icon: <SettingsIcon fontSize="small" /> },
-    { label: 'Support & Help', icon: <HelpOutlineIcon fontSize="small" /> },
+    // { label: 'Settings & Preferences', icon: <SettingsIcon fontSize="small" /> },
+    // { label: 'Support & Help', icon: <HelpOutlineIcon fontSize="small" /> },
     { label: 'Logout', icon: <LogoutIcon fontSize="small" /> },
   ];
 
