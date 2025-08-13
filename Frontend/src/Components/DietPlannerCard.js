@@ -67,7 +67,7 @@ const MealPlannerCard = () => {
       className="max-w-3xl mx-auto p-6 bg-white rounded-2xl shadow-md mt-8 border-2 relative top-20"
     >
       <h2 className="text-3xl font-bold text-green-700 text-center mb-6">
-         Meal Plan Predictor
+         Meal Planner
       </h2>
 
       <div className="grid md:grid-cols-2 gap-8">
